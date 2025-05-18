@@ -285,14 +285,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none),
                     focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            BorderSide(color: helper.cPrimary, width: 1.5)),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          BorderSide(color: helper.cPrimary, width: 1.5),
+                    ),
                   ),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                 ),
                 helper.vsLarge,
-
+                const SizedBox(
+                  height: 100,
+                ),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
