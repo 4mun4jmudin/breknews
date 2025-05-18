@@ -200,6 +200,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: helper.subtitle2.copyWith(color: helper.cError)),
                   ),
                 ),
+                const SizedBox(
+                  height: 300,
+                ),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
