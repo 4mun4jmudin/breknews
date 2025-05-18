@@ -111,14 +111,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 helper.vsMedium,
-                Text('Create',
-                    style: TextStyle(
-                        color: helper.cBlack,
-                        fontSize: 32,
-                        fontWeight: helper.bold,
-                        fontFamily: defaultFontFamily)),
                 Text(
-                  'Account',
+                  'Hello',
                   style: TextStyle(
                       color: helper.cPrimary,
                       fontSize: 32,
@@ -126,11 +120,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       fontFamily: defaultFontFamily),
                 ),
                 helper.vsTiny,
+
                 Text(
-                  'Fill your information below to register.',
+                  'Signup to get starterd.',
                   style: helper.subtitle1.copyWith(color: helper.cTextBlue),
                 ),
                 helper.vsLarge,
+                const SizedBox(
+                  height: 80,
+                ),
                 Row(children: [
                   Text(' * ',
                       style: TextStyle(
