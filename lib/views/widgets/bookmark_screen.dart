@@ -1,11 +1,12 @@
+// lib/views/widgets/bookmark_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 
 import '../../controllers/bookmark_controller.dart';
 import 'news_card_widget.dart';
 import '../utils/helper.dart' as helper;
-import '../../routes/route_name.dart';
+// import '../../routes/route_name.dart';
 
 class BookmarkScreen extends StatefulWidget {
   const BookmarkScreen({super.key});
@@ -15,7 +16,6 @@ class BookmarkScreen extends StatefulWidget {
 }
 
 class _BookmarkScreenState extends State<BookmarkScreen> {
-  int _currentBottomNavIndex = 1;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -29,20 +29,6 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
     super.dispose();
   }
 
-  void _onBottomNavTapped(int index) {
-    if (index == _currentBottomNavIndex) return;
-    switch (index) {
-      case 0:
-        context.goNamed(RouteName.home);
-        break;
-      case 1:
-        break;
-      case 2:
-        context.goNamed(RouteName.profile);
-        break;
-    }
-  }
-
   Widget _buildSearchBarAndFilter(BuildContext context, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -54,6 +40,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
             child: TextField(
               controller: _searchController,
               onSubmitted: (value) {
+                // TODO: Implement search functionality for bookmarks if desired
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -102,6 +89,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           helper.hsMedium,
           InkWell(
             onTap: () {
+              // TODO: Implement filter functionality for bookmarks if desired
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text(
@@ -139,141 +127,123 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
 
     return ChangeNotifierProvider(
       create: (_) => BookmarkController(),
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 16.0,
-                  right: 16.0,
-                  top: 20.0,
-                  bottom: 8.0,
-                ),
-                child: Text(
-                  "Bookmark",
-                  style: textTheme.headlineSmall?.copyWith(
-                    color: textTheme.displayLarge?.color,
-                    fontWeight: helper.bold,
-                  ),
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                top: 20.0,
+                bottom: 8.0,
+              ),
+              child: Text(
+                "Bookmark",
+                style: textTheme.headlineSmall?.copyWith(
+                  color: textTheme.displayLarge?.color,
+                  fontWeight: helper.bold,
                 ),
               ),
-              _buildSearchBarAndFilter(context, theme),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                child: Text(
-                  "Artikel yang telah Anda simpan:",
-                  style: textTheme.titleSmall?.copyWith(
-                    color: textTheme.bodyMedium?.color?.withOpacity(0.8),
-                  ),
+            ),
+            _buildSearchBarAndFilter(context, theme),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
+              child: Text(
+                "Artikel yang telah Anda simpan:",
+                style: textTheme.titleSmall?.copyWith(
+                  color: textTheme.bodyMedium?.color?.withOpacity(0.8),
                 ),
               ),
-              Expanded(
-                child: Consumer<BookmarkController>(
-                  builder: (context, controller, child) {
-                    if (controller.isLoading) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            colorScheme.primary,
-                          ),
+            ),
+            Expanded(
+              child: Consumer<BookmarkController>(
+                builder: (context, controller, child) {
+                  if (controller.isLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          colorScheme.primary,
                         ),
-                      );
-                    }
-                    if (controller.errorMessage != null) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            controller.errorMessage!,
+                      ),
+                    );
+                  }
+                  if (controller.errorMessage != null) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          controller.errorMessage!,
+                          style: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.error,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }
+                  if (controller.bookmarkedArticles.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.menu_book_rounded,
+                            size: 80,
+                            color: theme.hintColor.withOpacity(0.5),
+                          ),
+                          helper.vsMedium,
+                          Text(
+                            "Belum ada artikel yang di-bookmark.",
                             style: textTheme.titleMedium?.copyWith(
-                              color: colorScheme.error,
+                              color: textTheme.bodyMedium?.color,
                             ),
                             textAlign: TextAlign.center,
                           ),
-                        ),
-                      );
-                    }
-                    if (controller.bookmarkedArticles.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.menu_book_rounded,
-                              size: 80,
-                              color: theme.hintColor.withOpacity(0.5),
+                          helper.vsSmall,
+                          Text(
+                            "Simpan artikel untuk dibaca nanti.",
+                            style: textTheme.bodySmall?.copyWith(
+                              color: theme.hintColor,
                             ),
-                            helper.vsMedium,
-                            Text(
-                              "Belum ada artikel yang di-bookmark.",
-                              style: textTheme.titleMedium?.copyWith(
-                                color: textTheme.bodyMedium?.color,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            helper.vsSmall,
-                            Text(
-                              "Simpan artikel untuk dibaca nanti.",
-                              style: textTheme.bodySmall?.copyWith(
-                                color: theme.hintColor,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                    return RefreshIndicator(
-                      onRefresh: () => controller.loadBookmarks(),
-                      color: colorScheme.primary,
-                      child: ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.only(bottom: 16.0, top: 4.0),
-                        itemCount: controller.bookmarkedArticles.length,
-                        itemBuilder: (context, index) {
-                          final article = controller.bookmarkedArticles[index];
-                          return NewsCardWidget(
-                            article: article,
-                            isBookmarked: true,
-                            onBookmarkTap: () {
-                              controller.removeArticleFromBookmark(article);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "'${article.title}' dihapus dari bookmark.",
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     );
-                  },
-                ),
+                  }
+                  return RefreshIndicator(
+                    onRefresh: () => controller.loadBookmarks(),
+                    color: colorScheme.primary,
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 16.0, top: 4.0),
+                      itemCount: controller.bookmarkedArticles.length,
+                      itemBuilder: (context, index) {
+                        final article = controller.bookmarkedArticles[index];
+                        return NewsCardWidget(
+                          article: article,
+                          isBookmarked:
+                              true, // All articles here are bookmarked
+                          onBookmarkTap: () {
+                            controller.removeArticleFromBookmark(article);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "'${article.title}' dihapus dari bookmark.",
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentBottomNavIndex,
-          onTap: _onBottomNavTapped,
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bookmark_rounded),
-              label: 'Bookmark',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: 'Profile',
             ),
           ],
         ),

@@ -7,6 +7,9 @@ class RouteName {
   static const String home = 'home';
   static const String articleDetail = 'articleDetail';
   static const String bookmark = 'bookmark';
+  static const String addLocalArticle = 'addLocalArticle'; // New
+  static const String localArticles = 'localArticles'; // New
+
   static const String profile = 'profile';
   static const String editProfile = 'editProfile';
   static const String settings = 'settings';

@@ -1,5 +1,4 @@
 // lib/views/widgets/home_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -154,13 +153,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentBottomNavIndex = 0;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    // If HomeController needs to be initialized once when HomeScreen first appears,
+    // consider doing it here or in a way that survives widget rebuilds if not using Provider above this widget.
+    // Provider.of<HomeController>(context, listen: false).fetchTopHeadlinesByCategory("Headline");
   }
 
   @override
@@ -170,228 +171,191 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _onBottomNavTapped(int index) {
-    if (index == _currentBottomNavIndex) return;
-    switch (index) {
-      case 0:
-        break;
-      case 1:
-        context.goNamed(RouteName.bookmark);
-        break;
-      case 2:
-        context.goNamed(RouteName.profile);
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
 
+    // HomeScreen now provides its own HomeController
     return ChangeNotifierProvider(
       create: (context) => HomeController(),
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: SafeArea(
-          child: GestureDetector(
-            onTap: () {
-              if (_searchFocusNode.hasFocus) {
-                _searchFocusNode.unfocus();
-              }
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(context, theme),
-                Consumer<HomeController>(
+      child: SafeArea(
+        // Ensures content is not obscured by system UI like status bar
+        child: GestureDetector(
+          onTap: () {
+            if (_searchFocusNode.hasFocus) {
+              _searchFocusNode.unfocus();
+            }
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildHeader(context, theme),
+              Consumer<HomeController>(
+                builder: (context, controller, child) {
+                  return _buildSearchBarAndFilter(context, theme, controller);
+                },
+              ),
+              Consumer<HomeController>(
+                builder: (context, controller, child) {
+                  if (controller.isSearchActive && controller.isLoading) {
+                    return const SizedBox.shrink();
+                  }
+                  if (controller.isSearchActive &&
+                      !controller.isLoading &&
+                      controller.articles.isNotEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return _buildCategoryTabs(context, controller, theme);
+                },
+              ),
+              Consumer<HomeController>(
+                builder: (context, controller, child) {
+                  if (controller.isSearchActive) return const SizedBox.shrink();
+                  if (controller.isLoading && controller.articles.isEmpty) {
+                    return SizedBox(
+                      height: 200.0, // Height of the featured news carousel
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  if (controller.articles.isEmpty ||
+                      (controller.errorMessage != null &&
+                          controller.articles.isEmpty)) {
+                    return const SizedBox.shrink();
+                  }
+                  final List<Article> featuredArticles = controller.articles
+                      .take(5)
+                      .toList();
+                  if (featuredArticles.isEmpty) return const SizedBox.shrink();
+                  return _buildFeaturedNewsCarousel(
+                    context,
+                    featuredArticles,
+                    controller,
+                  );
+                },
+              ),
+              Consumer<HomeController>(
+                builder: (context, controller, child) {
+                  if (controller.isSearchActive &&
+                      controller.currentSearchQuery != null &&
+                      controller.currentSearchQuery!.isNotEmpty) {
+                    if (controller.isLoading) return const SizedBox.shrink();
+                    return _buildSectionTitle(
+                      'Hasil untuk: "${controller.currentSearchQuery}"',
+                      theme,
+                    );
+                  } else if (!controller.isSearchActive &&
+                      controller.selectedCategory.isNotEmpty &&
+                      controller.selectedCategory.toLowerCase() != "headline" &&
+                      controller.selectedCategory.toLowerCase() !=
+                          "top stories" &&
+                      controller.selectedCategory.toLowerCase() != "all news") {
+                    return _buildSectionTitle(
+                      'Kategori: ${controller.selectedCategory}',
+                      theme,
+                    );
+                  }
+                  return _buildSectionTitle("Berita Utama Terkini", theme);
+                },
+              ),
+              Expanded(
+                child: Consumer<HomeController>(
                   builder: (context, controller, child) {
-                    return _buildSearchBarAndFilter(context, theme, controller);
-                  },
-                ),
-                Consumer<HomeController>(
-                  builder: (context, controller, child) {
-                    if (controller.isSearchActive && controller.isLoading)
-                      return const SizedBox.shrink();
-                    if (controller.isSearchActive &&
-                        !controller.isLoading &&
-                        controller.articles.isNotEmpty)
-                      return const SizedBox.shrink();
-                    return _buildCategoryTabs(context, controller, theme);
-                  },
-                ),
-                Consumer<HomeController>(
-                  builder: (context, controller, child) {
-                    if (controller.isSearchActive)
-                      return const SizedBox.shrink();
                     if (controller.isLoading && controller.articles.isEmpty) {
-                      return SizedBox(
-                        height: 200.0,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              theme.colorScheme.primary,
-                            ),
+                      return Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            theme.colorScheme.primary,
                           ),
                         ),
                       );
                     }
-                    if (controller.articles.isEmpty ||
-                        (controller.errorMessage != null &&
-                            controller.articles.isEmpty)) {
-                      return const SizedBox.shrink();
+                    if (controller.errorMessage != null) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            'Gagal memuat berita:\n${controller.errorMessage}',
+                            style: textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.error,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
                     }
-                    final List<Article> featuredArticles = controller.articles
-                        .take(5)
-                        .toList();
-                    if (featuredArticles.isEmpty)
-                      return const SizedBox.shrink();
-                    return _buildFeaturedNewsCarousel(
-                      context,
-                      featuredArticles,
-                      controller,
+                    if (controller.articles.isEmpty && !controller.isLoading) {
+                      String message =
+                          controller.isSearchActive &&
+                              controller.currentSearchQuery != null
+                          ? 'Tidak ada hasil untuk "${controller.currentSearchQuery}".'
+                          : 'Tidak ada berita untuk kategori "${controller.selectedCategory}".';
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            message,
+                            style: textTheme.titleMedium?.copyWith(
+                              color: textTheme.bodyMedium?.color,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    }
+                    return RefreshIndicator(
+                      onRefresh: () =>
+                          controller.isSearchActive &&
+                              controller.currentSearchQuery != null
+                          ? controller.searchArticles(
+                              controller.currentSearchQuery!,
+                            )
+                          : controller.fetchTopHeadlinesByCategory(
+                              controller.selectedCategory,
+                            ),
+                      color: theme.colorScheme.primary,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        itemCount: controller.articles.length,
+                        itemBuilder: (context, index) {
+                          final article = controller.articles[index];
+                          bool isBookmarked = controller.isArticleBookmarked(
+                            article.url,
+                          );
+                          return NewsCardWidget(
+                            article: article,
+                            isBookmarked: isBookmarked,
+                            onBookmarkTap: () {
+                              controller.toggleBookmark(article);
+                              ScaffoldMessenger.of(
+                                context,
+                              ).hideCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    isBookmarked
+                                        ? "'${article.title}' dihapus dari bookmark."
+                                        : "'${article.title}' ditambahkan ke bookmark.",
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
                     );
                   },
                 ),
-                Consumer<HomeController>(
-                  builder: (context, controller, child) {
-                    if (controller.isSearchActive &&
-                        controller.currentSearchQuery != null &&
-                        controller.currentSearchQuery!.isNotEmpty) {
-                      if (controller.isLoading) return const SizedBox.shrink();
-                      return _buildSectionTitle(
-                        'Hasil untuk: "${controller.currentSearchQuery}"',
-                        theme,
-                      );
-                    } else if (!controller.isSearchActive &&
-                        controller.selectedCategory.isNotEmpty &&
-                        controller.selectedCategory.toLowerCase() !=
-                            "headline" &&
-                        controller.selectedCategory.toLowerCase() !=
-                            "top stories" &&
-                        controller.selectedCategory.toLowerCase() !=
-                            "all news") {
-                      return _buildSectionTitle(
-                        'Kategori: ${controller.selectedCategory}',
-                        theme,
-                      );
-                    }
-                    return _buildSectionTitle("Berita Utama Terkini", theme);
-                  },
-                ),
-                Expanded(
-                  child: Consumer<HomeController>(
-                    builder: (context, controller, child) {
-                      if (controller.isLoading && controller.articles.isEmpty) {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              theme.colorScheme.primary,
-                            ),
-                          ),
-                        );
-                      }
-                      if (controller.errorMessage != null) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              'Gagal memuat berita:\n${controller.errorMessage}',
-                              style: textTheme.titleMedium?.copyWith(
-                                color: theme.colorScheme.error,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
-                      }
-                      if (controller.articles.isEmpty &&
-                          !controller.isLoading) {
-                        String message =
-                            controller.isSearchActive &&
-                                controller.currentSearchQuery != null
-                            ? 'Tidak ada hasil untuk "${controller.currentSearchQuery}".'
-                            : 'Tidak ada berita untuk kategori "${controller.selectedCategory}".';
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              message,
-                              style: textTheme.titleMedium?.copyWith(
-                                color: textTheme.bodyMedium?.color,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
-                      }
-                      return RefreshIndicator(
-                        onRefresh: () =>
-                            controller.isSearchActive &&
-                                controller.currentSearchQuery != null
-                            ? controller.searchArticles(
-                                controller.currentSearchQuery!,
-                              )
-                            : controller.fetchTopHeadlinesByCategory(
-                                controller.selectedCategory,
-                              ),
-                        color: theme.colorScheme.primary,
-                        child: ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          itemCount: controller.articles.length,
-                          itemBuilder: (context, index) {
-                            final article = controller.articles[index];
-                            bool isBookmarked = controller.isArticleBookmarked(
-                              article.url,
-                            );
-                            return NewsCardWidget(
-                              article: article,
-                              isBookmarked: isBookmarked,
-                              onBookmarkTap: () {
-                                controller.toggleBookmark(article);
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      isBookmarked
-                                          ? "'${article.title}' dihapus dari bookmark."
-                                          : "'${article.title}' ditambahkan ke bookmark.",
-                                    ),
-                                    duration: const Duration(seconds: 2),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentBottomNavIndex,
-          onTap: _onBottomNavTapped,
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_filled),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bookmark_outline),
-              label: 'Bookmark',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: 'Profile',
-            ),
-          ],
         ),
       ),
     );
@@ -402,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.only(
         left: 16.0,
         right: 16.0,
-        top: 16.0,
+        top: 16.0, // Adjusted top padding for SafeArea
         bottom: 8.0,
       ),
       child: Row(
@@ -411,16 +375,14 @@ class _HomeScreenState extends State<HomeScreen> {
             'assets/news logo.png',
             height: 30.0,
             width: 30.0,
-
             errorBuilder: (context, error, stackTrace) {
               return Icon(
-                Icons.newspaper_rounded, // Ikon fallback
+                Icons.newspaper_rounded,
                 color: theme.colorScheme.primary,
                 size: 28.0,
               );
             },
           ),
-
           helper.hsLarge,
           Text(
             "News Hive",
@@ -494,7 +456,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         onPressed: () {
                           _searchController.clear();
-                          // Kembali ke kategori default atau terakhir setelah clear search
                           controller.fetchTopHeadlinesByCategory(
                             controller.categories.firstWhere(
                               (cat) => cat.toLowerCase() == "headline",
@@ -502,18 +463,20 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           );
                           _searchFocusNode.unfocus();
+                          // Notify the controller about the change to ensure UI updates
+                          setState(() {});
                         },
                       )
                     : null,
               ),
               onChanged: (value) {
+                // setState to rebuild and show/hide clear button
                 setState(() {});
               },
               onSubmitted: (value) {
                 if (value.trim().isNotEmpty) {
                   controller.searchArticles(value.trim());
                 } else {
-                  // Jika submit dengan field kosong, kembali ke kategori default
                   controller.fetchTopHeadlinesByCategory(
                     controller.categories.firstWhere(
                       (cat) => cat.toLowerCase() == "headline",
@@ -568,15 +531,14 @@ class _HomeScreenState extends State<HomeScreen> {
           final category = controller.categories[index];
           final bool isSelected =
               category == controller.selectedCategory &&
-              !controller
-                  .isSearchActive; // Kategori tidak aktif jika sedang search
+              !controller.isSearchActive;
 
           return GestureDetector(
             onTap: () {
-              _searchController
-                  .clear(); // Kosongkan search bar saat kategori dipilih
+              _searchController.clear();
               _searchFocusNode.unfocus();
               controller.onCategorySelected(category);
+              setState(() {}); // To update clear button if search was active
             },
             child: Container(
               alignment: Alignment.center,
@@ -621,6 +583,10 @@ class _HomeScreenState extends State<HomeScreen> {
         title,
         style: theme.textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.bold,
+          color: theme
+              .textTheme
+              .bodyLarge
+              ?.color, // Ensure text color matches theme
         ),
       ),
     );
@@ -629,7 +595,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildFeaturedNewsCarousel(
     BuildContext context,
     List<Article> featuredArticles,
-    HomeController controller,
+    HomeController controller, // Kept for potential future use with controller
   ) {
     if (featuredArticles.isEmpty) return const SizedBox.shrink();
     const double carouselHeight = 200.0;
@@ -638,7 +604,10 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: featuredArticles.length,
-        padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+        padding: const EdgeInsets.only(
+          left: 8.0,
+          right: 8.0,
+        ), // Consistent padding
         itemBuilder: (context, index) {
           final article = featuredArticles[index];
           return _FeaturedNewsCardWidget(article: article);
@@ -651,10 +620,19 @@ class _HomeScreenState extends State<HomeScreen> {
     BuildContext context,
     HomeController controller,
   ) {
+    // ShowModalBottomSheet needs a HomeController instance.
+    // Since HomeScreen now creates its own HomeController, we can pass it.
+    // However, if SortByOptionsWidget needs to *listen* to changes from this specific instance,
+    // it should be wrapped in a Consumer or accessed via Provider.of within its build method.
+    // For simply calling methods (like setSortOrder), passing the instance is fine.
+    // The current SortByOptionsWidget uses Provider.of(context, listen: false) and Consumer,
+    // which will pick up the HomeController provided by this HomeScreen's ChangeNotifierProvider.
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor:
+          Colors.transparent, // Bottom sheet will define its own bg
       builder: (BuildContext bc) {
+        // The SortByOptionsWidget will use the HomeController from this screen's provider
         return ChangeNotifierProvider.value(
           value: controller,
           child: const SortByOptionsWidget(),

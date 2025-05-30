@@ -1,4 +1,6 @@
+// lib/data/models/article_model.dart
 class Article {
+  final String? sourceId; // Added for source.id
   final String? sourceName;
   final String? author;
   final String title;
@@ -9,6 +11,7 @@ class Article {
   final String? content;
 
   Article({
+    this.sourceId, // Added
     this.sourceName,
     this.author,
     required this.title,
@@ -21,6 +24,7 @@ class Article {
 
   factory Article.fromJson(Map<String, dynamic> json) {
     return Article(
+      sourceId: json['source'] != null ? json['source']['id'] as String? : null,
       sourceName: json['source'] != null
           ? json['source']['name'] as String?
           : null,
@@ -34,5 +38,18 @@ class Article {
           : null,
       content: json['content'] as String?,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'source': {'id': sourceId, 'name': sourceName},
+      'author': author,
+      'title': title,
+      'description': description,
+      'url': url,
+      'urlToImage': urlToImage,
+      'publishedAt': publishedAt?.toIso8601String(),
+      'content': content,
+    };
   }
 }
