@@ -1,4 +1,3 @@
-// lib/views/widgets/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +8,6 @@ import 'news_card_widget.dart';
 import '../utils/helper.dart' as helper;
 import '../../routes/route_name.dart';
 
-// --- WIDGET KARTU BERITA UNGGULAN (FEATURED/HEADLINE CAROUSEL) ---
 class _FeaturedNewsCardWidget extends StatelessWidget {
   final Article article;
   const _FeaturedNewsCardWidget({required this.article});
@@ -102,12 +100,12 @@ class _FeaturedNewsCardWidget extends StatelessWidget {
                 left: 0,
                 right: 0,
                 child: Container(
-                  height: cardHeight * 0.55, // Perbesar area gradient
+                  height: cardHeight * 0.55,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
                         Colors.black.withOpacity(0.0),
-                        Colors.black.withOpacity(0.85), // Lebih pekat
+                        Colors.black.withOpacity(0.85),
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -122,7 +120,7 @@ class _FeaturedNewsCardWidget extends StatelessWidget {
                 child: Text(
                   article.title,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white, // Teks putih di atas scrim gelap
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     shadows: [
                       const Shadow(
@@ -144,7 +142,6 @@ class _FeaturedNewsCardWidget extends StatelessWidget {
   }
 }
 
-// --- WIDGET UTAMA LAYAR HOME ---
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -159,9 +156,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // If HomeController needs to be initialized once when HomeScreen first appears,
-    // consider doing it here or in a way that survives widget rebuilds if not using Provider above this widget.
-    // Provider.of<HomeController>(context, listen: false).fetchTopHeadlinesByCategory("Headline");
   }
 
   @override
@@ -176,11 +170,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
 
-    // HomeScreen now provides its own HomeController
     return ChangeNotifierProvider(
       create: (context) => HomeController(),
       child: SafeArea(
-        // Ensures content is not obscured by system UI like status bar
         child: GestureDetector(
           onTap: () {
             if (_searchFocusNode.hasFocus) {
@@ -214,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (controller.isSearchActive) return const SizedBox.shrink();
                   if (controller.isLoading && controller.articles.isEmpty) {
                     return SizedBox(
-                      height: 200.0, // Height of the featured news carousel
+                      height: 200.0,
                       child: Center(
                         child: CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
@@ -366,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.only(
         left: 16.0,
         right: 16.0,
-        top: 16.0, // Adjusted top padding for SafeArea
+        top: 16.0,
         bottom: 8.0,
       ),
       child: Row(
@@ -463,14 +455,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           );
                           _searchFocusNode.unfocus();
-                          // Notify the controller about the change to ensure UI updates
                           setState(() {});
                         },
                       )
                     : null,
               ),
               onChanged: (value) {
-                // setState to rebuild and show/hide clear button
                 setState(() {});
               },
               onSubmitted: (value) {
@@ -538,7 +528,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _searchController.clear();
               _searchFocusNode.unfocus();
               controller.onCategorySelected(category);
-              setState(() {}); // To update clear button if search was active
+              setState(() {});
             },
             child: Container(
               alignment: Alignment.center,
@@ -583,10 +573,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title,
         style: theme.textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.bold,
-          color: theme
-              .textTheme
-              .bodyLarge
-              ?.color, // Ensure text color matches theme
+          color: theme.textTheme.bodyLarge?.color,
         ),
       ),
     );
@@ -595,7 +582,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildFeaturedNewsCarousel(
     BuildContext context,
     List<Article> featuredArticles,
-    HomeController controller, // Kept for potential future use with controller
+    HomeController controller,
   ) {
     if (featuredArticles.isEmpty) return const SizedBox.shrink();
     const double carouselHeight = 200.0;
@@ -604,10 +591,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: featuredArticles.length,
-        padding: const EdgeInsets.only(
-          left: 8.0,
-          right: 8.0,
-        ), // Consistent padding
+        padding: const EdgeInsets.only(left: 8.0, right: 8.0),
         itemBuilder: (context, index) {
           final article = featuredArticles[index];
           return _FeaturedNewsCardWidget(article: article);
@@ -622,10 +606,8 @@ class _HomeScreenState extends State<HomeScreen> {
   ) {
     showModalBottomSheet(
       context: context,
-      backgroundColor:
-          Colors.transparent, // Bottom sheet will define its own bg
+      backgroundColor: Colors.transparent,
       builder: (BuildContext bc) {
-        // The SortByOptionsWidget will use the HomeController from this screen's provider
         return ChangeNotifierProvider.value(
           value: controller,
           child: const SortByOptionsWidget(),

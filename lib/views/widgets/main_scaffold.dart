@@ -8,8 +8,6 @@ class MainScaffold extends StatelessWidget {
 
   const MainScaffold({super.key, required this.child});
 
-  // Determines the selected index for the BottomAppBar items (0-3).
-  // Returns -1 if the FAB's screen (AddLocalArticleScreen) is active.
   int _calculateBottomAppBarIndex(BuildContext context) {
     final GoRouterState state = GoRouterState.of(context);
     final String? currentRouteName = state.topRoute?.name;
@@ -21,33 +19,30 @@ class MainScaffold extends StatelessWidget {
     if (currentRouteName == RouteName.bookmark ||
         location.startsWith('/${RouteName.bookmark}'))
       return 1;
-    // Index 2 in BottomAppBar is for Local Articles
     if (currentRouteName == RouteName.localArticles ||
         location.startsWith('/${RouteName.localArticles}'))
       return 2;
-    // Index 3 in BottomAppBar is for Profile
     if (currentRouteName == RouteName.profile ||
         location.startsWith('/${RouteName.profile}'))
       return 3;
 
-    // If AddLocalArticleScreen is active, no BottomAppBar item is "selected"
     if (currentRouteName == RouteName.addLocalArticle) return -1;
 
-    return 0; // Default to home
+    return 0;
   }
 
   void _onBottomAppBarItemTapped(int index, BuildContext context) {
     switch (index) {
-      case 0: // Home
+      case 0:
         context.goNamed(RouteName.home);
         break;
-      case 1: // Bookmark
+      case 1:
         context.goNamed(RouteName.bookmark);
         break;
-      case 2: // Local Articles
+      case 2:
         context.goNamed(RouteName.localArticles);
         break;
-      case 3: // Profile
+      case 3:
         context.goNamed(RouteName.profile);
         break;
     }
@@ -70,23 +65,19 @@ class MainScaffold extends StatelessWidget {
           }
         },
         backgroundColor: isAddArticleScreenActive
-            ? theme
-                  .colorScheme
-                  .secondaryContainer // A distinct color when active
-            : theme.colorScheme.primaryContainer, // Default FAB color
+            ? theme.colorScheme.secondaryContainer
+            : theme.colorScheme.primaryContainer,
         foregroundColor: isAddArticleScreenActive
             ? theme.colorScheme.onSecondaryContainer
             : theme.colorScheme.onPrimaryContainer,
         elevation: isAddArticleScreenActive ? 4.0 : 2.0,
-        shape: const CircleBorder(), // Ensures it's circular
+        shape: const CircleBorder(),
         child: const Icon(Icons.add_rounded, size: 30),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0, // Space for the FAB
-        // color: theme.bottomAppBarTheme.color, // Inherited from theme
-        // elevation: theme.bottomAppBarTheme.elevation, // Inherited
+        notchMargin: 8.0,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
@@ -106,11 +97,11 @@ class MainScaffold extends StatelessWidget {
               isSelected: bottomAppBarIndex == 1,
               onTap: () => _onBottomAppBarItemTapped(1, context),
             ),
-            const SizedBox(width: 48), // Space for the FAB notch
+            const SizedBox(width: 48),
             _buildBottomAppBarItem(
               context: context,
-              icon: Icons.article_outlined, // Icon for Local Articles
-              selectedIcon: Icons.article, // Filled version
+              icon: Icons.article_outlined,
+              selectedIcon: Icons.article,
               label: 'Local',
               isSelected: bottomAppBarIndex == 2,
               onTap: () => _onBottomAppBarItemTapped(2, context),
@@ -151,9 +142,7 @@ class MainScaffold extends StatelessWidget {
         onTap: onTap,
         customBorder: const CircleBorder(),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 6.0,
-          ), // Adjusted padding
+          padding: const EdgeInsets.symmetric(vertical: 6.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -162,7 +151,7 @@ class MainScaffold extends StatelessWidget {
                 color: itemColor,
                 size: iconSize,
               ),
-              const SizedBox(height: 3), // Fine-tune spacing
+              const SizedBox(height: 3),
               Text(
                 label,
                 style: TextStyle(

@@ -5,17 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../utils/helper.dart' as helper;
 import '../../routes/route_name.dart';
 
-// Kelas untuk menyimpan data setiap halaman onboarding
 class OnboardingPageUIData {
-  final String backgroundImagePath; // Gambar latar belakang utama
-  final String?
-  foregroundImagePath; // Gambar ilustrasi/orang di depan (opsional)
+  final String backgroundImagePath;
+  final String? foregroundImagePath;
   final String title;
   final String description;
-  final Color
-  dominantColor; // Warna dominan untuk halaman ini (misalnya untuk teks atau aksen)
-  final Color
-  backgroundColor; // Warna latar belakang jika gambar tidak full, atau untuk overlay
+  final Color dominantColor;
+  final Color backgroundColor;
 
   OnboardingPageUIData({
     required this.backgroundImagePath,
@@ -31,13 +27,11 @@ class OnboardingController with ChangeNotifier {
   final PageController pageController = PageController();
   int _currentPage = 0;
 
-  // Daftar konten halaman onboarding
-  // PENTING: Ganti imagePath dengan path aset gambar Anda yang valid
   final List<OnboardingPageUIData> _pages = [
     OnboardingPageUIData(
       backgroundImagePath: 'assets/images/oren.jpg',
       foregroundImagePath: 'assets/images/img intro 1.png',
-      title: 'Hi-Tech', // Sesuai gambar
+      title: 'Hi-Tech',
       description:
           'Explore the latest advancements and technological breakthroughs shaping our future.',
       dominantColor: Colors.orange.shade700,
@@ -46,7 +40,7 @@ class OnboardingController with ChangeNotifier {
     OnboardingPageUIData(
       backgroundImagePath: 'assets/images/biru.jpg',
       foregroundImagePath: 'assets/images/img intro 2.png',
-      title: 'Personality', // Sesuai gambar
+      title: 'Personality',
       description:
           'Understand diverse personalities and enhance your interpersonal skills effectively.',
       dominantColor: Colors.blue.shade700,
@@ -55,14 +49,12 @@ class OnboardingController with ChangeNotifier {
     OnboardingPageUIData(
       backgroundImagePath: 'assets/images/hejo.jpg',
       foregroundImagePath: 'assets/images/img intro 3.png',
-      title: 'Global Mind', // Sesuai gambar
+      title: 'Global Mind',
       description:
           'Develop a global mindset to navigate and succeed in an interconnected world.',
       dominantColor: Colors.green.shade700,
       backgroundColor: Colors.green.shade100,
     ),
-    // Halaman ke-4 di gambar Anda adalah halaman selamat datang, mungkin bukan bagian dari PageView ini.
-    // Jika ingin dimasukkan, tambahkan di sini.
   ];
 
   List<OnboardingPageUIData> get pages => _pages;
@@ -81,20 +73,9 @@ class OnboardingController with ChangeNotifier {
         curve: Curves.easeInOut,
       );
     } else {
-      // Halaman terakhir, arahkan ke halaman berikutnya (mis. Login atau halaman selamat datang SMK)
-      // Berdasarkan gambar, halaman terakhir adalah halaman "Selamat Datang di SMK..."
-      // Anda mungkin ingin navigasi khusus ke sana jika itu bukan bagian dari onboarding PageView.
-      // Untuk contoh ini, kita akan ke halaman login.
-      context.goNamed(
-        RouteName.login,
-      ); // Atau ke halaman selamat datang SMK jika ada rutenya
+      context.goNamed(RouteName.login);
     }
   }
-
-  // Tombol Skip mungkin tidak ada di desain baru ini, tapi bisa ditambahkan jika perlu
-  // void skip(BuildContext context) {
-  //   context.goNamed(RouteName.login);
-  // }
 
   @override
   void dispose() {
@@ -108,21 +89,17 @@ class OnboardingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData appTheme = Theme.of(context); // Tema aplikasi global
+    final ThemeData appTheme = Theme.of(context);
 
     return ChangeNotifierProvider(
       create: (_) => OnboardingController(),
       child: Consumer<OnboardingController>(
-        // Consumer untuk mendapatkan controller
         builder: (context, controller, child) {
-          // Dapatkan warna dominan dari halaman saat ini untuk tema tombol/indikator
           final currentPageData = controller.pages[controller.currentPage];
           final Color currentDominantColor = currentPageData.dominantColor;
 
           return Scaffold(
-            // backgroundColor diatur per halaman di _OnboardingPageContentWidget
             body: Column(
-              // Menggunakan Column untuk menumpuk PageView dan kontrol
               children: <Widget>[
                 Expanded(
                   child: PageView.builder(
@@ -132,9 +109,7 @@ class OnboardingScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final pageData = controller.pages[index];
                       return _OnboardingPageContentWidget(
-                        key: ValueKey(
-                          'onboarding_page_$index',
-                        ), // Key untuk performa
+                        key: ValueKey('onboarding_page_$index'),
                         backgroundImagePath: pageData.backgroundImagePath,
                         foregroundImagePath: pageData.foregroundImagePath,
                         title: pageData.title,
@@ -145,16 +120,13 @@ class OnboardingScreen extends StatelessWidget {
                     },
                   ),
                 ),
-                // Kontrol di bagian bawah (Indikator dan Tombol)
                 Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: 24.0,
                     vertical: MediaQuery.of(context).padding.bottom > 0
                         ? 24.0
-                        : 32.0, // Lebih banyak padding jika tidak ada safe area bawah
+                        : 32.0,
                   ),
-                  // Warna latar bisa disesuaikan atau transparan
-                  // color: appTheme.colorScheme.background, // atau controller.pages[controller.currentPage].backgroundColor
                   child: Column(
                     children: [
                       _buildPageIndicator(
@@ -162,9 +134,7 @@ class OnboardingScreen extends StatelessWidget {
                         currentDominantColor,
                         appTheme,
                       ),
-                      SizedBox(
-                        height: controller.totalPages > 1 ? 30.0 : 0,
-                      ), // Beri jarak jika ada indikator
+                      SizedBox(height: controller.totalPages > 1 ? 30.0 : 0),
                       _buildNavigationButton(
                         context,
                         controller,
@@ -187,8 +157,7 @@ class OnboardingScreen extends StatelessWidget {
     Color activeColor,
     ThemeData theme,
   ) {
-    if (controller.totalPages <= 1)
-      return const SizedBox.shrink(); // Jangan tampilkan jika hanya 1 halaman
+    if (controller.totalPages <= 1) return const SizedBox.shrink();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -224,24 +193,21 @@ class OnboardingScreen extends StatelessWidget {
       child: ElevatedButton(
         onPressed: () => controller.nextPageOrFinish(context),
         style: ElevatedButton.styleFrom(
-          backgroundColor: buttonColor, // Warna dominan halaman saat ini
-          foregroundColor: Colors.white, // Asumsi teks putih kontras
+          backgroundColor: buttonColor,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-              25.0,
-            ), // Tombol lebih bulat seperti contoh
+            borderRadius: BorderRadius.circular(25.0),
           ),
           textStyle: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
-        child: Text(isLastPage ? 'Mulai' : 'Selanjutnya'), // Sesuai contoh
+        child: Text(isLastPage ? 'Mulai' : 'Selanjutnya'),
       ),
     );
   }
 }
 
-// Widget terpisah untuk konten setiap halaman onboarding
 class _OnboardingPageContentWidget extends StatelessWidget {
   final String backgroundImagePath;
   final String? foregroundImagePath;
@@ -262,21 +228,18 @@ class _OnboardingPageContentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
-      color: backgroundColor, // Warna latar belakang per halaman
+      color: backgroundColor,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Gambar Latar Belakang
           Image.asset(
             backgroundImagePath,
-            fit: BoxFit.cover, // Agar mengisi seluruh area
+            fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) => Container(
-              color: backgroundColor, // Warna fallback jika gambar gagal dimuat
+              color: backgroundColor,
               child: Center(
                 child: Icon(
                   Icons.error_outline,
@@ -286,8 +249,6 @@ class _OnboardingPageContentWidget extends StatelessWidget {
               ),
             ),
           ),
-
-          // Overlay Gradasi (Opsional, untuk meningkatkan keterbacaan teks)
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -299,54 +260,38 @@ class _OnboardingPageContentWidget extends StatelessWidget {
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [
-                  0.0,
-                  0.3,
-                  0.7,
-                  1.0,
-                ], // Sesuaikan stops untuk efek gradasi
+                stops: const [0.0, 0.3, 0.7, 1.0],
               ),
             ),
           ),
-
-          // Gambar Depan (Orang/Ilustrasi)
           if (foregroundImagePath != null)
             Positioned.fill(
-              bottom:
-                  screenHeight *
-                  0.25, // Sesuaikan posisi agar tidak tertutup teks
+              bottom: screenHeight * 0.25,
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: Image.asset(
                   foregroundImagePath!,
-                  height: screenHeight * 0.5, // Sesuaikan ukuran gambar depan
+                  height: screenHeight * 0.5,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) =>
-                      const SizedBox.shrink(), // Sembunyikan jika error
+                      const SizedBox.shrink(),
                 ),
               ),
             ),
-
-          // Konten Teks
           Positioned(
-            bottom:
-                screenHeight *
-                0.05, // Posisi teks dari bawah (di atas tombol & indikator)
+            bottom: screenHeight * 0.05,
             left: 24,
             right: 24,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment:
-                  CrossAxisAlignment.start, // Teks rata kiri seperti di contoh
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
                   style: helper.headline2.copyWith(
-                    // Gaya dari helper, lebih besar
-                    color: Colors.white, // Teks putih agar kontras dengan latar
+                    color: Colors.white,
                     fontWeight: helper.bold,
                     shadows: [
-                      // Bayangan teks untuk keterbacaan
                       const Shadow(
                         blurRadius: 8.0,
                         color: Colors.black54,
@@ -359,10 +304,7 @@ class _OnboardingPageContentWidget extends StatelessWidget {
                 Text(
                   description,
                   style: helper.subtitle1.copyWith(
-                    // Gaya dari helper
-                    color: Colors.white.withOpacity(
-                      0.9,
-                    ), // Teks putih sedikit transparan
+                    color: Colors.white.withOpacity(0.9),
                     height: 1.5,
                     shadows: [
                       const Shadow(

@@ -31,7 +31,6 @@ class NewsDetailScreen extends StatelessWidget {
     }
   }
 
-  // Helper widget untuk placeholder saat loading gambar
   Widget _buildLoadingPlaceholder(
     BuildContext context,
     ThemeData theme,
@@ -50,7 +49,6 @@ class NewsDetailScreen extends StatelessWidget {
     );
   }
 
-  // Helper widget untuk placeholder jika gambar error atau tidak ada
   Widget _buildImageErrorPlaceholder(
     BuildContext context,
     ThemeData theme,
@@ -60,9 +58,7 @@ class NewsDetailScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: imageHeight,
-      color: theme.cardColor.withOpacity(
-        0.8,
-      ), // Sedikit transparan agar tidak terlalu solid
+      color: theme.cardColor.withOpacity(0.8),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -92,11 +88,11 @@ class NewsDetailScreen extends StatelessWidget {
     final TextTheme textTheme = theme.textTheme;
     final ColorScheme colorScheme = theme.colorScheme;
     final double screenHeight = MediaQuery.of(context).size.height;
-    final double imageHeight = screenHeight * 0.35; // Tinggi gambar konsisten
+    final double imageHeight = screenHeight * 0.35;
 
     String formattedDate = article.publishedAt != null
         ? DateFormat(
-            'EEEE, dd MMMM yyyy, HH:mm', // Format 'yyyy' ditambahkan untuk kejelasan tahun
+            'EEEE, dd MMMM yyyy, HH:mm',
             'id_ID',
           ).format(article.publishedAt!)
         : 'Tanggal tidak tersedia';
@@ -110,7 +106,6 @@ class NewsDetailScreen extends StatelessWidget {
     Widget imageDisplayWidget;
     if (article.urlToImage != null && article.urlToImage!.isNotEmpty) {
       if (article.urlToImage!.startsWith('http')) {
-        // Gambar dari Network
         imageDisplayWidget = Image.network(
           article.urlToImage!,
           width: double.infinity,
@@ -138,7 +133,6 @@ class NewsDetailScreen extends StatelessWidget {
           },
         );
       } else {
-        // Asumsikan path file lokal
         File imageFile = File(article.urlToImage!);
         if (imageFile.existsSync()) {
           imageDisplayWidget = Image.file(
@@ -171,7 +165,6 @@ class NewsDetailScreen extends StatelessWidget {
         }
       }
     } else {
-      // Tidak ada path gambar
       imageDisplayWidget = _buildImageErrorPlaceholder(
         context,
         theme,
@@ -218,14 +211,8 @@ class NewsDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // --- CARD UNTUK GAMBAR DAN INFO UTAMA ---
             Card(
-              margin: const EdgeInsets.fromLTRB(
-                12.0,
-                12.0,
-                12.0,
-                0,
-              ), // Mengurangi margin bawah card
+              margin: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0),
               elevation: 3.0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
@@ -235,9 +222,7 @@ class NewsDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Tampilkan widget gambar yang sudah ditentukan
                   Hero(
-                    // Tag Hero harus unik, kombinasi judul dan timestamp bisa lebih aman
                     tag:
                         article.urlToImage ??
                         (article.title +
@@ -253,9 +238,7 @@ class NewsDetailScreen extends StatelessWidget {
                           article.title,
                           style: textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: textTheme
-                                .displayLarge
-                                ?.color, // Sesuaikan dengan warna teks tema
+                            color: textTheme.displayLarge?.color,
                           ),
                         ),
                         helper.vsMedium,
@@ -302,19 +285,16 @@ class NewsDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // --- KONTEN ARTIKEL ---
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
-                vertical: 16.0, // Beri jarak dari card di atas
+                vertical: 16.0,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (article.content != null && article.content!.isNotEmpty)
                     Text(
-                      // Menghapus '[+... chars]' jika ada
                       article.content!.contains(' [+')
                           ? article.content!.substring(
                               0,

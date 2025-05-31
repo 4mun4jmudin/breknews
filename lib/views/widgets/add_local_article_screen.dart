@@ -36,7 +36,6 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
   ];
 
   Future<void> _pickImage(ImageSource source) async {
-    // ... (logika pickImage tetap sama)
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? pickedFile = await picker.pickImage(
@@ -60,7 +59,6 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
   }
 
   void _showImageSourceActionSheet(BuildContext context) {
-    // ... (logika _showImageSourceActionSheet tetap sama)
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -124,14 +122,12 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
     );
   }
 
-  // Widget untuk dialog sukses kustom
   Future<void> _showSuccessDialog() async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // Pengguna harus menekan tombol untuk menutup
+      barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         Future.delayed(const Duration(seconds: 2), () {
-          // Tutup otomatis setelah 2 detik
           if (mounted && Navigator.of(dialogContext).canPop()) {
             Navigator.of(dialogContext).pop();
           }
@@ -148,9 +144,7 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: helper.cSuccess.withOpacity(
-                    0.15,
-                  ), // Warna background lingkaran
+                  color: helper.cSuccess.withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -161,16 +155,16 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
               ),
               helper.vsLarge,
               Text(
-                "Great!", // Sesuai UI yang dilampirkan
+                "Great!",
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: helper.cSuccess, // Warna teks utama dialog
+                  color: helper.cSuccess,
                 ),
               ),
               helper.vsSmall,
               Text(
-                "Your Article Was Successfully Published", // Sesuai UI
+                "Your Article Was Successfully Published",
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Theme.of(
@@ -179,7 +173,6 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
                 ),
               ),
               helper.vsLarge,
-              // Tidak perlu tombol OK jika menutup otomatis
             ],
           ),
         );
@@ -226,7 +219,6 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
     );
 
     if (mounted) {
-      // Tampilkan dialog sukses kustom
       await _showSuccessDialog();
 
       _titleController.clear();
@@ -238,10 +230,6 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
         _isSaving = false;
       });
 
-      // Navigasi setelah dialog (atau setelah delay dialog jika ada)
-      // Pengguna mungkin ingin melihat dialognya dulu sebelum navigasi
-      // Jika dialog menutup otomatis, navigasi bisa dilakukan setelah pop dialog
-      // atau setelah _showSuccessDialog() jika tidak ada nilai yang ditunggu dari dialog
       if (context.mounted) {
         context.goNamed(RouteName.localArticles);
       }
@@ -257,7 +245,6 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
   }
 
   Widget _buildTextField({
-    // ... (method _buildTextField tetap sama)
     required TextEditingController controller,
     required String labelText,
     required String hintText,
@@ -341,23 +328,16 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ... (bagian build method yang lain tetap sama)
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
 
     final Color currentAppBarBackgroundColor =
         theme.brightness == Brightness.dark
-        ? theme
-              .colorScheme
-              .surface // Gunakan warna surface dari colorScheme untuk latar AppBar gelap
-        // Atau bisa juga: theme.appBarTheme.backgroundColor ?? theme.colorScheme.surface
-        : Colors.white; // Latar belakang putih untuk mode terang
+        ? theme.colorScheme.surface
+        : Colors.white;
 
     final Color currentAppBarContentColor = theme.brightness == Brightness.dark
-        ? theme
-              .colorScheme
-              .onSurface // Warna teks/ikon yang kontras di atas surface gelap
-        // Atau bisa juga: theme.appBarTheme.foregroundColor ?? theme.colorScheme.onSurface
+        ? theme.colorScheme.onSurface
         : helper.cTextBlue;
 
     return Scaffold(
@@ -366,35 +346,25 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
         title: Text(
           "tambahkan berita terbaru",
           style: theme.appBarTheme.titleTextStyle?.copyWith(
-            color:
-                currentAppBarContentColor, // Gunakan warna konten yang sudah ditentukan
+            color: currentAppBarContentColor,
           ),
         ),
-        backgroundColor:
-            currentAppBarBackgroundColor, // Gunakan warna latar yang sudah ditentukan
-        elevation:
-            1.0, // Anda bisa mengambil ini dari theme.appBarTheme.elevation jika mau
+        backgroundColor: currentAppBarBackgroundColor,
+        elevation: 1.0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color:
-                currentAppBarContentColor, // Gunakan warna konten yang sudah ditentukan
+            color: currentAppBarContentColor,
           ),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
             } else {
-              // Pastikan RouteName.home sudah diimpor dan benar
               context.goNamed(RouteName.home);
             }
           },
         ),
-        // Jika ada actions icons, mereka juga akan terpengaruh oleh iconTheme di bawah
-        // atau Anda bisa memberi warna secara eksplisit.
-        iconTheme: IconThemeData(
-          color: currentAppBarContentColor,
-        ), // Menyelaraskan warna ikon lain di AppBar
-        // foregroundColor: currentAppBarContentColor, // Alternatif lain untuk mengatur warna default konten AppBar
+        iconTheme: IconThemeData(color: currentAppBarContentColor),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -403,7 +373,6 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              // Add Cover Photos
               GestureDetector(
                 onTap: () => _showImageSourceActionSheet(context),
                 child: Container(
@@ -562,13 +531,12 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
         ),
       ),
       bottomNavigationBar: Padding(
-        // Tombol Publish Now dipindahkan ke sini
         padding: EdgeInsets.fromLTRB(
           16.0,
           8.0,
           16.0,
           MediaQuery.of(context).padding.bottom + 16.0,
-        ), // Padding untuk area aman bawah
+        ),
         child: ElevatedButton(
           onPressed: _isSaving ? null : _saveArticle,
           style: ElevatedButton.styleFrom(

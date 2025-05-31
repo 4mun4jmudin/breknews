@@ -18,7 +18,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Widget untuk baris detail profil (mis. Nomor HP, Alamat)
   Widget _buildProfileDetailRow(
     BuildContext context,
     IconData icon,
@@ -67,7 +66,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Widget untuk item aksi (mis. Edit Profile, Pengaturan)
   Widget _buildActionItem(
     BuildContext context,
     IconData icon,
@@ -114,22 +112,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final TextTheme textTheme = theme.textTheme;
     final ColorScheme colorScheme = theme.colorScheme;
 
-    // Warna teks utama untuk header yang kontras dengan background blur/gelap
     final Color headerTextColor = helper.cWhite;
 
     return ChangeNotifierProvider(
-      create: (_) =>
-          ProfileController()
-            ..loadUserProfile(), // Muat data saat controller dibuat
+      create: (_) => ProfileController()..loadUserProfile(),
       child: Scaffold(
-        // AppBar transparan atau tidak ada, header akan di-handle oleh CustomScrollView
-        extendBodyBehindAppBar:
-            true, // Agar body bisa di belakang AppBar jika AppBar transparan
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            // Tombol kembali jika ini bukan root dari shell
             icon: Icon(
               Icons.arrow_back_ios_new_rounded,
               color: headerTextColor.withOpacity(0.8),
@@ -184,23 +176,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onRefresh: () => controller.refreshProfile(),
               color: colorScheme.primary,
               child: CustomScrollView(
-                physics:
-                    const BouncingScrollPhysics(), // Efek scroll yang lebih modern
+                physics: const BouncingScrollPhysics(),
                 slivers: <Widget>[
-                  // SliverAppBar untuk header profil yang dinamis
                   SliverAppBar(
-                    expandedHeight: 280.0, // Tinggi header saat diperluas
+                    expandedHeight: 280.0,
                     floating: false,
-                    pinned:
-                        true, // Judul "Profil" akan tetap terlihat saat scroll
-                    backgroundColor: theme.colorScheme.primary.withOpacity(
-                      0.8,
-                    ), // Warna AppBar saat di-pin
+                    pinned: true,
+                    backgroundColor: theme.colorScheme.primary.withOpacity(0.8),
                     elevation: 2.0,
                     flexibleSpace: FlexibleSpaceBar(
                       centerTitle: true,
                       title: Text(
-                        displayName, // Tampilkan nama saat AppBar menyusut
+                        displayName,
                         style: textTheme.titleLarge?.copyWith(
                           color: headerTextColor,
                           fontWeight: FontWeight.bold,
@@ -218,13 +205,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       Image.asset(
                                         'assets/bgf.jpg',
                                         fit: BoxFit.cover,
-                                      ), // Fallback ke bgf.jpg
+                                      ),
                                 )
                               : Image.asset(
-                                  'assets/bgf.jpg', // Gambar default jika tidak ada foto profil
+                                  'assets/bgf.jpg',
                                   fit: BoxFit.cover,
                                 ),
-                          // Efek blur atau overlay gelap untuk kontras teks
+
                           BackdropFilter(
                             filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
                             child: Container(
@@ -233,13 +220,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                           ),
-                          // Konten Header Profil (Foto, Nama, Email)
+
                           Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 CircleAvatar(
-                                  radius: 55, // Ukuran foto profil
+                                  radius: 55,
                                   backgroundColor: theme.cardColor.withOpacity(
                                     0.5,
                                   ),
@@ -285,7 +272,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
 
-                  // Konten utama (Detail dan Aksi) dalam SliverList
                   SliverList(
                     delegate: SliverChildListDelegate([
                       Padding(
@@ -369,8 +355,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   children: [
                                     _buildActionItem(
                                       context,
-                                      Icons
-                                          .edit_attributes_outlined, // Ikon baru
+                                      Icons.edit_attributes_outlined,
                                       "Edit Profile",
                                       onTap: () async {
                                         /* ... logika edit ... */

@@ -9,9 +9,8 @@ import '../../routes/route_name.dart';
 
 class NewsCardWidget extends StatelessWidget {
   final Article article;
-  final bool isBookmarked; // Untuk artikel dari API (online)
-  final VoidCallback
-  onBookmarkTap; // Fungsi tap untuk bookmark atau aksi lain (mis. hapus)
+  final bool isBookmarked;
+  final VoidCallback onBookmarkTap;
 
   const NewsCardWidget({
     super.key,
@@ -25,10 +24,8 @@ class NewsCardWidget extends StatelessWidget {
       width: 100.0,
       height: 100.0,
       decoration: BoxDecoration(
-        color: theme.cardColor, // Atau theme.highlightColor
-        borderRadius: BorderRadius.circular(
-          8.0,
-        ), // Sesuaikan dengan ClipRRect di luar
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(8.0),
       ),
       child: Icon(
         Icons.image_not_supported_outlined,
@@ -47,7 +44,7 @@ class NewsCardWidget extends StatelessWidget {
       width: 100.0,
       height: 100.0,
       decoration: BoxDecoration(
-        color: theme.cardColor, // Atau theme.highlightColor
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Center(
@@ -70,9 +67,7 @@ class NewsCardWidget extends StatelessWidget {
     final ColorScheme colorScheme = theme.colorScheme;
 
     String formattedDate = article.publishedAt != null
-        ? DateFormat('dd MMM yyyy, HH:mm', 'id_ID').format(
-            article.publishedAt!,
-          ) // Format lebih bersahabat
+        ? DateFormat('dd MMM yyyy, HH:mm', 'id_ID').format(article.publishedAt!)
         : 'No date available';
 
     String sourceDisplay = article.sourceName?.isNotEmpty ?? false
@@ -81,13 +76,11 @@ class NewsCardWidget extends StatelessWidget {
               ? article.author!
               : "Unknown Source");
 
-    bool isLocalArticle =
-        article.url == null || article.url!.isEmpty; // Indikasi artikel lokal
+    bool isLocalArticle = article.url == null || article.url!.isEmpty;
 
     Widget imageWidget;
     if (article.urlToImage != null && article.urlToImage!.isNotEmpty) {
       if (article.urlToImage!.startsWith('http')) {
-        // Gambar dari Network
         imageWidget = Image.network(
           article.urlToImage!,
           width: 100.0,
@@ -105,7 +98,6 @@ class NewsCardWidget extends StatelessWidget {
               },
         );
       } else {
-        // Asumsikan path file lokal
         File imageFile = File(article.urlToImage!);
         if (imageFile.existsSync()) {
           imageWidget = Image.file(
@@ -131,9 +123,6 @@ class NewsCardWidget extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        // Artikel lokal mungkin tidak memiliki URL web, jadi detailnya harus ditangani secara berbeda
-        // Untuk saat ini, kita tetap mencoba membukanya di NewsDetailScreen,
-        // yang mungkin perlu penyesuaian untuk menangani artikel lokal dengan baik.
         context.pushNamed(RouteName.articleDetail, extra: article);
       },
       child: Padding(
@@ -142,19 +131,16 @@ class NewsCardWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             ClipRRect(
-              // Pastikan gambar dipotong sesuai border radius
               borderRadius: BorderRadius.circular(8.0),
               child: imageWidget,
             ),
             helper.hsMedium,
             Expanded(
               child: SizedBox(
-                // Batasi tinggi kolom teks agar konsisten dengan tinggi gambar
                 height: 100.0,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween, // Atur space
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,11 +148,10 @@ class NewsCardWidget extends StatelessWidget {
                         Text(
                           article.title,
                           style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight
-                                .bold, // Gunakan fontWeight dari helper jika ada
+                            fontWeight: FontWeight.bold,
                             color: textTheme.bodyLarge?.color,
                             height: 1.2,
-                          ), // Atur line height jika perlu
+                          ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -183,7 +168,6 @@ class NewsCardWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // helper.vsTiny, // Beri sedikit ruang sebelum tanggal
                     Text(
                       formattedDate,
                       style: textTheme.labelSmall?.copyWith(
@@ -197,15 +181,11 @@ class NewsCardWidget extends StatelessWidget {
               ),
             ),
             helper.hsTiny,
-            // Ikon aksi: Bookmark untuk artikel online, Hapus untuk artikel lokal
             InkWell(
-              onTap:
-                  onBookmarkTap, // Fungsi ini akan berbeda tergantung konteks
-              borderRadius: BorderRadius.circular(
-                20,
-              ), // Area tap yang lebih baik
+              onTap: onBookmarkTap,
+              borderRadius: BorderRadius.circular(20),
               child: Padding(
-                padding: const EdgeInsets.all(6.0), // Padding untuk ikon
+                padding: const EdgeInsets.all(6.0),
                 child: Icon(
                   isLocalArticle
                       ? Icons.delete_outline_rounded

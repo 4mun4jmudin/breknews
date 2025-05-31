@@ -2,7 +2,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../utils/helper.dart' as helper; // Menggunakan helper Anda
+import '../utils/helper.dart' as helper;
 import '../../routes/route_name.dart';
 import '../utils/form_validaror.dart';
 import '../../services/database_helper.dart';
@@ -76,9 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.0),
           ),
-          backgroundColor: Theme.of(
-            context,
-          ).cardColor, // Menggunakan warna kartu dari tema
+          backgroundColor: Theme.of(context).cardColor,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -93,9 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 message,
                 textAlign: TextAlign.center,
                 style: helper.subtitle1.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.color, // Warna teks dari tema
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   fontWeight: helper.bold,
                 ),
               ),
@@ -113,7 +109,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       SnackBar(
         content: Text(message, style: TextStyle(color: helper.cWhite)),
         backgroundColor: helper.cError,
-        behavior: SnackBarBehavior.floating, // Membuat SnackBar mengambang
+        behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
       ),
@@ -163,7 +159,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // Helper widget untuk membangun TextFormField (mirip dengan LoginScreen)
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -247,13 +242,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final String? defaultFontFamily = helper.headline1.fontFamily;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Warna untuk kontras di atas gambar latar (mirip LoginScreen)
-    final Color overlayColor = Colors.black.withOpacity(
-      0.40,
-    ); // Lebih gelap untuk kontras lebih baik
+    final Color overlayColor = Colors.black.withOpacity(0.40);
     final Color textOnBgColor = helper.cWhite;
-    final Color primaryColorOnBg =
-        helper.cPrimary; // Bisa disesuaikan jika cPrimary tidak kontras
+    final Color primaryColorOnBg = helper.cPrimary;
     final Color fieldFillColor = Colors.white.withOpacity(0.15);
     final Color fieldHintColor = Colors.white.withOpacity(0.7);
     final Color fieldEnabledBorderColor = Colors.white.withOpacity(0.3);
@@ -262,15 +253,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Gambar Latar Belakang (opsional, ganti dengan path aset Anda)
           Image.asset(
             'assets/images/iconlogin1.png',
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              return Container(color: theme.colorScheme.background); // Fallback
+              return Container(color: theme.colorScheme.background);
             },
           ),
-          Container(color: overlayColor), // Overlay gelap
+          Container(color: overlayColor),
 
           SafeArea(
             child: Center(
@@ -284,15 +274,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Salam Pembuka
                         Text(
-                          'Create Account', // Judul lebih jelas
+                          'Create Account',
                           textAlign: TextAlign.center,
                           style: helper.headline1.copyWith(
                             color: textOnBgColor,
                             fontWeight: helper.bold,
                             fontFamily: defaultFontFamily,
-                            fontSize: 34, // Sedikit penyesuaian ukuran
+                            fontSize: 34,
                             shadows: [
                               const Shadow(
                                 blurRadius: 4,
@@ -304,7 +293,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         helper.vsSmall,
                         Text(
-                          'Join us and start your journey!', // Subtitle
+                          'Join us and start your journey!',
                           textAlign: TextAlign.center,
                           style: helper.subtitle1.copyWith(
                             color: textOnBgColor.withOpacity(0.9),
@@ -371,7 +360,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _buildTextField(
                           controller: _confirmPasswordController,
                           hintText: 'Confirm your password',
-                          prefixIconData: Icons.lock, // Ikon baru
+                          prefixIconData: Icons.lock,
                           validator: _validateConfirmPassword,
                           isPassword: true,
                           isPasswordVisible: _isConfirmPasswordVisible,
@@ -379,8 +368,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             _isConfirmPasswordVisible =
                                 !_isConfirmPasswordVisible;
                           }),
-                          textInputAction:
-                              TextInputAction.done, // Aksi terakhir
+                          textInputAction: TextInputAction.done,
                           contentColor: textOnBgColor,
                           hintColorValue: fieldHintColor,
                           fillColorValue: fieldFillColor,

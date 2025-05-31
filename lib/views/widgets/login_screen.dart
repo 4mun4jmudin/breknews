@@ -3,7 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../utils/helper.dart' as helper; // Menggunakan helper Anda
+import '../utils/helper.dart' as helper;
 import '../../routes/route_name.dart';
 import '../utils/form_validaror.dart';
 import '../../services/database_helper.dart';
@@ -159,11 +159,11 @@ class _LoginScreenState extends State<LoginScreen> {
     bool isPassword = false,
     bool isPasswordVisible = false,
     VoidCallback? onVisibilityToggle,
-    required Color contentColor, // Warna untuk teks input dan ikon prefix
-    required Color hintColorValue, // Warna untuk hint text
-    required Color fillColorValue, // Warna untuk isian field
-    required Color focusedBorderColor, // Warna border saat fokus
-    required Color enabledBorderColor, // Warna border saat enable
+    required Color contentColor,
+    required Color hintColorValue,
+    required Color fillColorValue,
+    required Color focusedBorderColor,
+    required Color enabledBorderColor,
   }) {
     final ThemeData theme = Theme.of(context);
     return TextFormField(
@@ -176,9 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
         hintStyle: helper.subtitle2.copyWith(color: hintColorValue),
         prefixIcon: Icon(
           prefixIconData,
-          color: contentColor.withOpacity(
-            0.8,
-          ), // Ikon sedikit lebih transparan dari teks
+          color: contentColor.withOpacity(0.8),
           size: 22,
         ),
         suffixIcon: isPassword
@@ -233,68 +231,46 @@ class _LoginScreenState extends State<LoginScreen> {
     final String? defaultFontFamily = helper.headline1.fontFamily;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Tentukan warna berdasarkan mode tema untuk kontras di atas gambar latar
-    // Jika gambar latar gelap, teks harus terang, dan sebaliknya.
-    // Untuk contoh ini, saya asumsikan gambar latar Anda bisa gelap atau terang,
-    // jadi kita buat overlay gelap dan teks terang.
-    final Color overlayColor = Colors.black.withOpacity(
-      0.50,
-    ); // Overlay gelap untuk kontras
-    final Color textOnBgColor = helper.cWhite; // Teks putih di atas overlay
-    final Color primaryColorOnBg =
-        helper.cPrimary; // Warna primer untuk aksen, pastikan kontras
-    final Color fieldFillColor = Colors.white.withOpacity(
-      0.15,
-    ); // Isian field semi-transparan
+    final Color overlayColor = Colors.black.withOpacity(0.50);
+    final Color textOnBgColor = helper.cWhite;
+    final Color primaryColorOnBg = helper.cPrimary;
+    final Color fieldFillColor = Colors.white.withOpacity(0.15);
     final Color fieldHintColor = Colors.white.withOpacity(0.7);
     final Color fieldEnabledBorderColor = Colors.white.withOpacity(0.3);
 
     return Scaffold(
-      // backgroundColor tidak di-set di sini agar Stack bisa mengisi layar
       body: Stack(
-        // Gunakan Stack untuk menumpuk gambar latar dan konten
-        fit: StackFit.expand, // Agar Stack mengisi seluruh layar
+        fit: StackFit.expand,
         children: [
-          // 1. Gambar Latar Belakang
           Image.asset(
-            'assets/images/iconlogin1.png', // GANTI DENGAN PATH GAMBAR LATAR ANDA
+            'assets/images/iconlogin1.png',
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              // Fallback jika gambar gagal dimuat
               return Container(color: theme.colorScheme.background);
             },
           ),
-
-          // 2. Overlay Gelap (Opsional, untuk meningkatkan kontras teks)
           Container(color: overlayColor),
-
-          // 3. Konten Utama (Form Login)
           SafeArea(
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 400,
-                ), // Lebar maksimal form
+                constraints: const BoxConstraints(maxWidth: 400),
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment
-                          .center, // Pusatkan konten secara vertikal
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Salam Pembuka
                         Text(
                           'Hello Again!',
                           textAlign: TextAlign.center,
                           style: helper.headline1.copyWith(
-                            color: textOnBgColor, // Teks putih
+                            color: textOnBgColor,
                             fontWeight: helper.bold,
                             fontFamily: defaultFontFamily,
-                            fontSize: 38, // Sedikit lebih besar
+                            fontSize: 38,
                             shadows: [
-                              // Bayangan untuk keterbacaan
                               const Shadow(
                                 blurRadius: 4,
                                 color: Colors.black54,
@@ -308,9 +284,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Welcome back, you\'ve been missed!',
                           textAlign: TextAlign.center,
                           style: helper.subtitle1.copyWith(
-                            color: textOnBgColor.withOpacity(
-                              0.9,
-                            ), // Teks putih dengan sedikit transparansi
+                            color: textOnBgColor.withOpacity(0.9),
                             fontSize: 16,
                             shadows: [
                               const Shadow(
@@ -322,24 +296,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         SizedBox(height: screenHeight * 0.07),
-
-                        // Input Email
                         _buildTextField(
                           controller: _emailController,
                           hintText: 'Enter your email',
                           prefixIconData: Icons.alternate_email_rounded,
                           validator: AppValidators.validateEmail,
-                          contentColor:
-                              textOnBgColor, // Warna teks di dalam field
+                          contentColor: textOnBgColor,
                           hintColorValue: fieldHintColor,
                           fillColorValue: fieldFillColor,
-                          focusedBorderColor:
-                              primaryColorOnBg, // Warna primer untuk fokus
+                          focusedBorderColor: primaryColorOnBg,
                           enabledBorderColor: fieldEnabledBorderColor,
                         ),
                         helper.vsMedium,
-
-                        // Input Password
                         _buildTextField(
                           controller: _passwordController,
                           hintText: 'Enter your password',
@@ -371,26 +339,22 @@ class _LoginScreenState extends State<LoginScreen> {
                               'Forgot Password?',
                               style: helper.subtitle2.copyWith(
                                 color: primaryColorOnBg.withOpacity(0.9),
-                              ), // Warna primer
+                              ),
                             ),
                           ),
                         ),
                         SizedBox(height: screenHeight * 0.05),
-
-                        // Tombol Login
                         SizedBox(
                           height: 52,
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _attemptLogin,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  primaryColorOnBg, // Warna primer dari helper
-                              foregroundColor:
-                                  helper.cWhite, // Teks putih di atas tombol
+                              backgroundColor: primaryColorOnBg,
+                              foregroundColor: helper.cWhite,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
-                              elevation: 5.0, // Bayangan lebih tegas
+                              elevation: 5.0,
                               textStyle: helper.subtitle1.copyWith(
                                 fontWeight: helper.bold,
                                 letterSpacing: 0.5,
@@ -411,24 +375,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         helper.vsLarge,
-
-                        // Link ke Halaman Sign Up
                         Center(
                           child: RichText(
                             textAlign: TextAlign.center,
                             text: TextSpan(
                               text: 'Don’t have an account? ',
                               style: helper.subtitle2.copyWith(
-                                color: textOnBgColor.withOpacity(
-                                  0.85,
-                                ), // Teks putih
+                                color: textOnBgColor.withOpacity(0.85),
                                 fontFamily: defaultFontFamily,
                               ),
                               children: <TextSpan>[
                                 TextSpan(
                                   text: 'Sign Up Now',
                                   style: helper.subtitle2.copyWith(
-                                    color: primaryColorOnBg, // Warna primer
+                                    color: primaryColorOnBg,
                                     fontWeight: helper.bold,
                                     fontFamily: defaultFontFamily,
                                     decoration: TextDecoration.underline,
