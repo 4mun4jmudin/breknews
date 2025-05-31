@@ -138,12 +138,33 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
                 top: 20.0,
                 bottom: 8.0,
               ),
-              child: Text(
-                "Bookmark",
-                style: textTheme.headlineSmall?.copyWith(
-                  color: textTheme.displayLarge?.color,
-                  fontWeight: helper.bold,
-                ),
+              child: Row(
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        'assets/images/icon.png',
+                        height: 50.0,
+                        width: 50.0,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.newspaper_rounded,
+                            color: theme.colorScheme.primary,
+                            size: 28.0,
+                          );
+                        },
+                      ),
+                      helper.hsLarge,
+                      Text(
+                        "Bookmark",
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
             _buildSearchBarAndFilter(context, theme),

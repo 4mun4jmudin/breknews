@@ -1,5 +1,5 @@
 // lib/views/widgets/local_articles_screen.dart
-import 'dart:io';
+// import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/local_article_controller.dart';
@@ -7,8 +7,8 @@ import '../../controllers/local_article_controller.dart';
 import '../../data/models/article_model.dart';
 import '../utils/helper.dart' as helper;
 import 'news_card_widget.dart';
-import 'package:go_router/go_router.dart';
-import '../../routes/route_name.dart';
+// import 'package:go_router/go_router.dart';
+// import '../../routes/route_name.dart';
 
 class LocalArticlesScreen extends StatelessWidget {
   const LocalArticlesScreen({super.key});
@@ -23,13 +23,39 @@ class LocalArticlesScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 12.0),
-            child: Text(
-              "My Local Articles",
-              style: textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: textTheme.displayLarge?.color,
-              ),
+            padding: const EdgeInsets.only(
+              left: 16.0,
+              right: 16.0,
+              top: 20.0,
+              bottom: 8.0,
+            ),
+            child: Row(
+              children: [
+                Row(
+                  children: [
+                    Image.asset(
+                      'assets/images/icon.png',
+                      height: 50.0,
+                      width: 50.0,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.newspaper_rounded,
+                          color: theme.colorScheme.primary,
+                          size: 28.0,
+                        );
+                      },
+                    ),
+                    helper.hsLarge,
+                    Text(
+                      "Lokal berita anda",
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -114,7 +140,6 @@ class LocalArticlesScreen extends StatelessWidget {
                                       ),
                                     ),
                                     onPressed: () {
-                                      // Panggil metode remove dari controller
                                       localArticleController.removeLocalArticle(
                                         article,
                                       );

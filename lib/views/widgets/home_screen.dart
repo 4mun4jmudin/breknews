@@ -372,9 +372,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           Image.asset(
-            'assets/news logo.png',
-            height: 30.0,
-            width: 30.0,
+            'assets/images/icon.png',
+            height: 50.0,
+            width: 50.0,
             errorBuilder: (context, error, stackTrace) {
               return Icon(
                 Icons.newspaper_rounded,
@@ -385,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           helper.hsLarge,
           Text(
-            "News Hive",
+            "Break News",
             style: theme.textTheme.headlineSmall?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
@@ -620,13 +620,6 @@ class _HomeScreenState extends State<HomeScreen> {
     BuildContext context,
     HomeController controller,
   ) {
-    // ShowModalBottomSheet needs a HomeController instance.
-    // Since HomeScreen now creates its own HomeController, we can pass it.
-    // However, if SortByOptionsWidget needs to *listen* to changes from this specific instance,
-    // it should be wrapped in a Consumer or accessed via Provider.of within its build method.
-    // For simply calling methods (like setSortOrder), passing the instance is fine.
-    // The current SortByOptionsWidget uses Provider.of(context, listen: false) and Consumer,
-    // which will pick up the HomeController provided by this HomeScreen's ChangeNotifierProvider.
     showModalBottomSheet(
       context: context,
       backgroundColor:
