@@ -9,7 +9,7 @@ import 'package:breaknews/views/widgets/register_screen.dart';
 import 'package:breaknews/views/widgets/splas_screen.dart';
 import 'package:breaknews/views/widgets/settings_screen.dart';
 import 'package:breaknews/views/widgets/widgets/change_password_screen.dart';
-import 'package:breaknews/views/widgets/add_local_article_screen.dart'; // Import new screen
+import 'package:breaknews/views/widgets/add_local_article_screen.dart';
 import 'package:breaknews/views/widgets/local_articles_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -21,7 +21,7 @@ import 'routes/route_name.dart';
 import 'views/utils/helper.dart' as helper;
 import 'data/models/article_model.dart';
 import 'controllers/theme_controller.dart';
-import 'views/widgets/main_scaffold.dart'; // Import the new MainScaffold
+import 'views/widgets/main_scaffold.dart';
 import 'package:breaknews/controllers/local_article_controller.dart';
 
 void main() async {
@@ -30,78 +30,66 @@ void main() async {
 
   runApp(
     MultiProvider(
-      // MultiProvider membungkus MyApp
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeController()),
-        ChangeNotifierProvider(
-          create: (_) => LocalArticleController(),
-        ), // Controller disediakan di sini
-        // Provider lain jika ada
+        ChangeNotifierProvider(create: (_) => LocalArticleController()),
       ],
       child: const MyApp(),
     ),
   );
 }
 
-// final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(); // Optional: For root navigator
-// final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(); // Optional: For shell navigator
-
 final GoRouter _router = GoRouter(
-  initialLocation: RouteName.splash, // '/splash'
-  // navigatorKey: _rootNavigatorKey, // Optional
+  initialLocation: RouteName.splash,
   routes: <RouteBase>[
     GoRoute(
-      path: RouteName.splash, // This is '/splash'
-      name: RouteName.splash, // Name is also '/splash' as per current RouteName
+      path: RouteName.splash,
+      name: RouteName.splash,
       builder: (BuildContext context, GoRouterState state) {
         return const SplashScreen();
       },
     ),
     GoRoute(
       path: '/introduction',
-      name: RouteName.introduction, // 'introduction'
+      name: RouteName.introduction,
       builder: (BuildContext context, GoRouterState state) {
         return const OnboardingScreen();
       },
     ),
     GoRoute(
       path: '/login',
-      name: RouteName.login, // 'login'
+      name: RouteName.login,
       builder: (BuildContext context, GoRouterState state) {
         return const LoginScreen();
       },
     ),
     GoRoute(
       path: '/register',
-      name: RouteName.register, // 'register'
+      name: RouteName.register,
       builder: (BuildContext context, GoRouterState state) {
         return const RegisterScreen();
       },
     ),
-
-    // ShellRoute for main app navigation with BottomNavigationBar
     ShellRoute(
-      // navigatorKey: _shellNavigatorKey, // Optional
       builder: (BuildContext context, GoRouterState state, Widget child) {
         return MainScaffold(child: child);
       },
       routes: <RouteBase>[
         GoRoute(
-          path: '/home', // Path for the home screen
-          name: RouteName.home, // 'home'
+          path: '/home',
+          name: RouteName.home,
           builder: (BuildContext context, GoRouterState state) {
             return const HomeScreen();
           },
         ),
         GoRoute(
-          path: '/bookmark', // Path for the bookmark screen
-          name: RouteName.bookmark, // 'bookmark'
+          path: '/bookmark',
+          name: RouteName.bookmark,
           builder: (BuildContext context, GoRouterState state) {
             return const BookmarkScreen();
           },
         ),
         GoRoute(
-          // Screen for the "Add" action
           path: '/add-local-article',
           name: RouteName.addLocalArticle,
           builder: (BuildContext context, GoRouterState state) {
@@ -116,17 +104,15 @@ final GoRouter _router = GoRouter(
           },
         ),
         GoRoute(
-          path: '/profile', // Path for the profile screen
-          name: RouteName.profile, // 'profile'
+          path: '/profile',
+          name: RouteName.profile,
           builder: (BuildContext context, GoRouterState state) {
             return const ProfileScreen();
           },
-          // Nested routes for profile. These will be displayed within the MainScaffold
-          // and the 'Profile' tab in BottomNavBar will remain active.
           routes: <RouteBase>[
             GoRoute(
-              path: 'edit', // Relative path: /profile/edit
-              name: RouteName.editProfile, // 'editProfile'
+              path: 'edit',
+              name: RouteName.editProfile,
               builder: (BuildContext context, GoRouterState state) {
                 final int? userId = state.extra as int?;
                 if (userId != null) {
@@ -142,16 +128,15 @@ final GoRouter _router = GoRouter(
               },
             ),
             GoRoute(
-              path: 'settings', // Relative path: /profile/settings
-              name: RouteName.settings, // 'settings'
+              path: 'settings',
+              name: RouteName.settings,
               builder: (BuildContext context, GoRouterState state) {
                 return const SettingsScreen();
               },
               routes: <RouteBase>[
                 GoRoute(
-                  path:
-                      'change-password', // Relative: /profile/settings/change-password
-                  name: RouteName.changePassword, // 'changePassword'
+                  path: 'change-password',
+                  name: RouteName.changePassword,
                   builder: (BuildContext context, GoRouterState state) {
                     return const ChangePasswordScreen();
                   },
@@ -162,11 +147,9 @@ final GoRouter _router = GoRouter(
         ),
       ],
     ),
-
-    // Other top-level routes (not part of the BottomNav shell)
     GoRoute(
       path: '/article-detail',
-      name: RouteName.articleDetail, // 'articleDetail'
+      name: RouteName.articleDetail,
       builder: (BuildContext context, GoRouterState state) {
         final Article? article = state.extra as Article?;
         if (article != null) {
@@ -181,14 +164,14 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/forgot-password',
-      name: RouteName.forgotPassword, // 'forgotPassword'
+      name: RouteName.forgotPassword,
       builder: (BuildContext context, GoRouterState state) {
         return const ForgotPasswordScreen();
       },
     ),
     GoRoute(
       path: '/reset-password',
-      name: RouteName.resetPassword, // 'resetPassword'
+      name: RouteName.resetPassword,
       builder: (BuildContext context, GoRouterState state) {
         final String? email = state.extra as String?;
         if (email != null) {
@@ -295,9 +278,6 @@ class MyApp extends StatelessWidget {
           backgroundColor: helper.cWhite,
           selectedItemColor: helper.cPrimary,
           unselectedItemColor: helper.cLinear.withOpacity(0.8),
-          // Add text style for labels if needed
-          // selectedLabelStyle: helper.caption.copyWith(fontWeight: helper.medium),
-          // unselectedLabelStyle: helper.caption,
         ),
       ),
       darkTheme: ThemeData(
@@ -310,14 +290,12 @@ class MyApp extends StatelessWidget {
           primary: helper.cPrimary,
           secondary: helper.cLinear,
           background: const Color(0xFF121212),
-          surface: const Color(
-            0xFF1E1E1E,
-          ), // Used by Card, BottomNavBar by default
+          surface: const Color(0xFF1E1E1E),
           error: helper.cError,
           onPrimary: helper.cWhite,
           onSecondary: helper.cBlack,
           onBackground: helper.cWhite.withOpacity(0.87),
-          onSurface: helper.cWhite.withOpacity(0.87), // Text on Cards/Surface
+          onSurface: helper.cWhite.withOpacity(0.87),
           onError: helper.cWhite,
         ),
         scaffoldBackgroundColor: const Color(0xFF121212),
@@ -411,11 +389,9 @@ class MyApp extends StatelessWidget {
           filled: true,
         ),
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: const Color(0xFF1E1E1E), // Matches dark AppBar
+          backgroundColor: const Color(0xFF1E1E1E),
           selectedItemColor: helper.cPrimary,
           unselectedItemColor: helper.cGrey.withOpacity(0.7),
-          // selectedLabelStyle: helper.caption.copyWith(fontWeight: helper.medium),
-          // unselectedLabelStyle: helper.caption,
         ),
       ),
       themeMode: themeController.themeMode,
