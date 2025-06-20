@@ -1,6 +1,6 @@
 // lib/data/models/article_model.dart
 class Article {
-  final String? sourceId; // Added for source.id
+  final String? sourceId;
   final String? sourceName;
   final String? author;
   final String title;
@@ -9,9 +9,10 @@ class Article {
   final String? urlToImage;
   final DateTime? publishedAt;
   final String? content;
+  final String? slug; // Tambahan field untuk slug
 
   Article({
-    this.sourceId, // Added
+    this.sourceId,
     this.sourceName,
     this.author,
     required this.title,
@@ -20,23 +21,31 @@ class Article {
     this.urlToImage,
     this.publishedAt,
     this.content,
+    this.slug,
   });
 
   factory Article.fromJson(Map<String, dynamic> json) {
     return Article(
-      sourceId: json['source'] != null ? json['source']['id'] as String? : null,
-      sourceName: json['source'] != null
-          ? json['source']['name'] as String?
-          : null,
-      author: json['author'] as String?,
-      title: json['title'] as String? ?? 'No Title',
-      description: json['description'] as String?,
-      url: json['url'] as String?,
-      urlToImage: json['urlToImage'] as String?,
-      publishedAt: json['publishedAt'] != null
-          ? DateTime.tryParse(json['publishedAt'] as String)
+      sourceId:
+          json['id'] as String?, // Gunakan 'id' dari artikel sebagai sourceId
+      sourceName:
+          json['author_name'] as String? ??
+          'Sumber tidak diketahui', // Langsung ambil dari 'author_name'
+      author:
+          json['author_name'] as String?, // Langsung ambil dari 'author_name'
+      title: json['title'] as String? ?? 'Tanpa Judul',
+      description: json['summary'] as String? ?? json['content'] as String?,
+      url: json['slug'] != null ? '/api/news/${json['slug']}' : null,
+      urlToImage:
+          json['featured_image_url']
+              as String?, // Sesuaikan dengan key 'featured_image_url'
+      publishedAt:
+          json['published_at'] !=
+              null // Prioritaskan 'published_at'
+          ? DateTime.tryParse(json['published_at'] as String)
           : null,
       content: json['content'] as String?,
+      slug: json['slug'] as String?,
     );
   }
 
@@ -50,6 +59,7 @@ class Article {
       'urlToImage': urlToImage,
       'publishedAt': publishedAt?.toIso8601String(),
       'content': content,
+      'slug': slug,
     };
   }
 }

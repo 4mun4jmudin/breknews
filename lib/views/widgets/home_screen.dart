@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:breaknews/views/widgets/sort_by_options_widget.dart';
+// import 'package:breaknews/views/widgets/sort_by_options_widget.dart'; // Sudah tidak digunakan
 import '../../controllers/home_controller.dart';
 import '../../data/models/article_model.dart';
 import 'news_card_widget.dart';
@@ -190,12 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Consumer<HomeController>(
                 builder: (context, controller, child) {
-                  if (controller.isSearchActive && controller.isLoading) {
-                    return const SizedBox.shrink();
-                  }
-                  if (controller.isSearchActive &&
-                      !controller.isLoading &&
-                      controller.articles.isNotEmpty) {
+                  if (controller.isSearchActive) {
                     return const SizedBox.shrink();
                   }
                   return _buildCategoryTabs(context, controller, theme);
@@ -243,17 +238,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       theme,
                     );
                   } else if (!controller.isSearchActive &&
-                      controller.selectedCategory.isNotEmpty &&
-                      controller.selectedCategory.toLowerCase() != "headline" &&
-                      controller.selectedCategory.toLowerCase() !=
-                          "top stories" &&
                       controller.selectedCategory.toLowerCase() != "all news") {
                     return _buildSectionTitle(
                       'Kategori: ${controller.selectedCategory}',
                       theme,
                     );
                   }
-                  return _buildSectionTitle("Berita Utama Terkini", theme);
+                  return _buildSectionTitle("Berita Populer", theme);
                 },
               ),
               Expanded(
@@ -308,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? controller.searchArticles(
                               controller.currentSearchQuery!,
                             )
-                          : controller.fetchTopHeadlinesByCategory(
+                          : controller.fetchArticlesByCategory(
                               controller.selectedCategory,
                             ),
                       color: theme.colorScheme.primary,
@@ -448,11 +439,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         onPressed: () {
                           _searchController.clear();
-                          controller.fetchTopHeadlinesByCategory(
-                            controller.categories.firstWhere(
-                              (cat) => cat.toLowerCase() == "headline",
-                              orElse: () => controller.categories.first,
-                            ),
+                          // --- PERUBAHAN DI SINI ---
+                          controller.fetchArticlesByCategory(
+                            // Gunakan kategori default yang baru
+                            controller.categories.first,
                           );
                           _searchFocusNode.unfocus();
                           setState(() {});
@@ -467,39 +457,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (value.trim().isNotEmpty) {
                   controller.searchArticles(value.trim());
                 } else {
-                  controller.fetchTopHeadlinesByCategory(
-                    controller.categories.firstWhere(
-                      (cat) => cat.toLowerCase() == "headline",
-                      orElse: () => controller.categories.first,
-                    ),
+                  // --- PERUBAHAN DI SINI ---
+                  controller.fetchArticlesByCategory(
+                    // Gunakan kategori default yang baru
+                    controller.categories.first,
                   );
                 }
                 _searchFocusNode.unfocus();
               },
             ),
           ),
-          helper.hsMedium,
-          InkWell(
-            onTap: () {
-              _showSortByFilterOptions(context, controller);
-              debugPrint("Filter button tapped");
-            },
-            borderRadius: BorderRadius.circular(12.0),
-            child: Container(
-              padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                color: theme.brightness == Brightness.dark
-                    ? Colors.grey.shade800.withOpacity(0.5)
-                    : helper.cGrey.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: Icon(
-                Icons.tune_rounded,
-                color: theme.textTheme.bodyMedium?.color,
-                size: 22,
-              ),
-            ),
-          ),
+          // --- TOMBOL FILTER SEMENTARA DINONAKTIFKAN ---
+          // helper.hsMedium,
+          // InkWell(
+          //   onTap: () {
+          //     // _showSortByFilterOptions(context, controller);
+          //     debugPrint("Filter button tapped");
+          //   },
+          //   borderRadius: BorderRadius.circular(12.0),
+          //   child: Container(
+          //     padding: const EdgeInsets.all(12.0),
+          //     decoration: BoxDecoration(
+          //       color: theme.brightness == Brightness.dark
+          //           ? Colors.grey.shade800.withOpacity(0.5)
+          //           : helper.cGrey.withOpacity(0.7),
+          //       borderRadius: BorderRadius.circular(12.0),
+          //     ),
+          //     child: Icon(
+          //       Icons.tune_rounded,
+          //       color: theme.textTheme.bodyMedium?.color,
+          //       size: 22,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -528,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _searchController.clear();
               _searchFocusNode.unfocus();
               controller.onCategorySelected(category);
-              setState(() {});
+              // setState tidak diperlukan di sini karena Provider akan handle
             },
             child: Container(
               alignment: Alignment.center,
@@ -600,19 +590,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showSortByFilterOptions(
-    BuildContext context,
-    HomeController controller,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext bc) {
-        return ChangeNotifierProvider.value(
-          value: controller,
-          child: const SortByOptionsWidget(),
-        );
-      },
-    );
-  }
+  // void _showSortByFilterOptions(
+  //   BuildContext context,
+  //   HomeController controller,
+  // ) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     backgroundColor: Colors.transparent,
+  //     builder: (BuildContext bc) {
+  //       return ChangeNotifierProvider.value(
+  //         value: controller,
+  //         child: const SortByOptionsWidget(),
+  //       );
+  //     },
+  //   );
+  // }
 }

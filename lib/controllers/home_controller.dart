@@ -18,9 +18,10 @@ class HomeController with ChangeNotifier {
 
   Set<String> _bookmarkedArticleUrls = {};
 
+  // --- SESUAIKAN KATEGORI DENGAN API BARU ---
+  // API baru Anda sepertinya tidak memiliki 'Headline' atau 'Top Stories' secara spesifik,
+  // jadi kita gunakan kategori umum. 'All News' akan kita handle untuk mengambil semua.
   final List<String> categories = [
-    "Headline",
-    "Top Stories",
     "All News",
     "Business",
     "Technology",
@@ -29,7 +30,7 @@ class HomeController with ChangeNotifier {
     "Health",
     "Science",
   ];
-  String _selectedCategory = "Headline";
+  String _selectedCategory = "All News";
   String get selectedCategory => _selectedCategory;
 
   bool _isSearchActive = false;
@@ -38,17 +39,14 @@ class HomeController with ChangeNotifier {
   String? _currentSearchQuery;
   String? get currentSearchQuery => _currentSearchQuery;
 
-  String _currentSortBy = 'publishedAt';
-  String get currentSortBy => _currentSortBy;
-
-  final Map<String, String> sortByOptionsDisplay = const {
-    'publishedAt': 'Terbaru',
-    'relevancy': 'Relevansi',
-    'popularity': 'Popularitas',
-  };
+  // Fitur sorting dari API lama kita hilangkan sementara karena API baru tidak menentukannya
+  // di endpoint publik.
+  // String _currentSortBy = 'publishedAt';
+  // String get currentSortBy => _currentSortBy;
+  // final Map<String, String> sortByOptionsDisplay = const { ... };
 
   HomeController() {
-    fetchTopHeadlinesByCategory(_selectedCategory);
+    fetchArticlesByCategory(_selectedCategory);
   }
 
   void _setLoading(bool loading) {
@@ -73,7 +71,8 @@ class HomeController with ChangeNotifier {
     }
   }
 
-  Future<void> fetchTopHeadlinesByCategory(String category) async {
+  // --- GANTI NAMA FUNGSI & LOGIKANYA ---
+  Future<void> fetchArticlesByCategory(String category) async {
     _selectedCategory = category;
     _isSearchActive = false;
     _currentSearchQuery = null;
@@ -82,15 +81,13 @@ class HomeController with ChangeNotifier {
     _articles = [];
 
     try {
-      String? apiCategory;
-      if (category.toLowerCase() != "all news" &&
-          category.toLowerCase() != "headline" &&
-          category.toLowerCase() != "top stories") {
-        apiCategory = category.toLowerCase();
-      }
+      // Jika kategori adalah 'All News', kita tidak mengirim parameter kategori
+      String? apiCategory = category.toLowerCase() == "all news"
+          ? null
+          : category;
 
+      // Gunakan method fetchTopHeadlines yang sudah kita modifikasi
       _articles = await _newsApiService.fetchTopHeadlines(
-        country: 'us',
         category: apiCategory,
       );
       await _loadBookmarkedStatus();
@@ -105,28 +102,20 @@ class HomeController with ChangeNotifier {
   Future<void> searchArticles(String query) async {
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) {
-      fetchTopHeadlinesByCategory(
-        categories.firstWhere(
-          (cat) => cat.toLowerCase() == "headline",
-          orElse: () => categories.first,
-        ),
-      );
+      fetchArticlesByCategory(categories.first);
       return;
     }
 
     _currentSearchQuery = trimmedQuery;
     _isSearchActive = true;
-    _selectedCategory = "";
+    _selectedCategory = ""; // Kosongkan kategori saat mencari
     _setLoading(true);
     _setError(null);
     _articles = [];
 
     try {
-      _articles = await _newsApiService.searchNews(
-        trimmedQuery,
-        language: 'en',
-        sortBy: _currentSortBy,
-      );
+      // Gunakan method searchNews yang sudah kita modifikasi
+      _articles = await _newsApiService.searchNews(trimmedQuery);
       await _loadBookmarkedStatus();
     } catch (e) {
       _setError(e.toString());
@@ -136,24 +125,12 @@ class HomeController with ChangeNotifier {
     }
   }
 
-  Future<void> setSortOrder(String newSortBy) async {
-    if (sortByOptionsDisplay.containsKey(newSortBy) &&
-        _currentSortBy != newSortBy) {
-      _currentSortBy = newSortBy;
-
-      if (_isSearchActive &&
-          _currentSearchQuery != null &&
-          _currentSearchQuery!.isNotEmpty) {
-        await searchArticles(_currentSearchQuery!);
-      } else {
-        notifyListeners();
-      }
-    }
-  }
+  // Fungsi sorting kita non-aktifkan
+  // Future<void> setSortOrder(String newSortBy) async { ... }
 
   void onCategorySelected(String category) {
     if (_selectedCategory != category || _articles.isEmpty || _isSearchActive) {
-      fetchTopHeadlinesByCategory(category);
+      fetchArticlesByCategory(category);
     }
   }
 

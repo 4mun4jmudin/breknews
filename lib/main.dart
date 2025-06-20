@@ -1,3 +1,5 @@
+//----------------------------------------------------//
+
 import 'package:breaknews/views/widgets/bookmark_screen.dart';
 import 'package:breaknews/views/widgets/edit_profile_screen.dart';
 import 'package:breaknews/views/widgets/forgot_password_screen.dart';

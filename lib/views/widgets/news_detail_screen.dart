@@ -3,7 +3,7 @@ import 'dart:io'; // Import untuk File
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/models/article_model.dart';
 import '../utils/helper.dart' as helper;
@@ -13,23 +13,23 @@ class NewsDetailScreen extends StatelessWidget {
 
   const NewsDetailScreen({super.key, required this.article});
 
-  Future<void> _launchURL(BuildContext context, String? urlString) async {
-    if (urlString == null || urlString.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('URL tidak tersedia untuk artikel ini.')),
-      );
-      return;
-    }
-    final Uri url = Uri.parse(urlString);
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      debugPrint('Could not launch $urlString');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tidak bisa membuka link: $urlString')),
-        );
-      }
-    }
-  }
+  // Future<void> _launchURL(BuildContext context, String? urlString) async {
+  //   if (urlString == null || urlString.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('URL tidak tersedia untuk artikel ini.')),
+  //     );
+  //     return;
+  //   }
+  //   final Uri url = Uri.parse(urlString);
+  //   if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+  //     debugPrint('Could not launch $urlString');
+  //     if (context.mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Tidak bisa membuka link: $urlString')),
+  //       );
+  //     }
+  //   }
+  // }
 
   Widget _buildLoadingPlaceholder(
     BuildContext context,
@@ -330,33 +330,33 @@ class NewsDetailScreen extends StatelessWidget {
                       ),
                     ),
                   helper.vsLarge,
-                  if (article.url != null && article.url!.isNotEmpty)
-                    Center(
-                      child: ElevatedButton.icon(
-                        icon: const Icon(
-                          Icons.open_in_browser_rounded,
-                          size: 20,
-                        ),
-                        label: Text(
-                          'Baca Selengkapnya di ${article.sourceName ?? "Sumber"}',
-                        ),
-                        onPressed: () {
-                          _launchURL(context, article.url);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.primary,
-                          foregroundColor: colorScheme.onPrimary,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  helper.vsLarge,
+                  // if (article.url != null && article.url!.isNotEmpty)
+                  //   Center(
+                  //     child: ElevatedButton.icon(
+                  //       icon: const Icon(
+                  //         Icons.open_in_browser_rounded,
+                  //         size: 20,
+                  //       ),
+                  //       label: Text(
+                  //         'Baca Selengkapnya di ${article.sourceName ?? "Sumber"}',
+                  //       ),
+                  //       onPressed: () {
+                  //         _launchURL(context, article.url);
+                  //       },
+                  //       style: ElevatedButton.styleFrom(
+                  //         backgroundColor: colorScheme.primary,
+                  //         foregroundColor: colorScheme.onPrimary,
+                  //         padding: const EdgeInsets.symmetric(
+                  //           horizontal: 24,
+                  //           vertical: 12,
+                  //         ),
+                  //         shape: RoundedRectangleBorder(
+                  //           borderRadius: BorderRadius.circular(25.0),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // helper.vsLarge,
                 ],
               ),
             ),
