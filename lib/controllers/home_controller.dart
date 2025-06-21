@@ -1,3 +1,4 @@
+// lib/controllers/home_controller.dart
 import 'package:flutter/material.dart';
 import '../services/news_api_service.dart';
 import '../data/models/article_model.dart';
@@ -18,9 +19,6 @@ class HomeController with ChangeNotifier {
 
   Set<String> _bookmarkedArticleUrls = {};
 
-  // --- SESUAIKAN KATEGORI DENGAN API BARU ---
-  // API baru Anda sepertinya tidak memiliki 'Headline' atau 'Top Stories' secara spesifik,
-  // jadi kita gunakan kategori umum. 'All News' akan kita handle untuk mengambil semua.
   final List<String> categories = [
     "All News",
     "Business",
@@ -38,12 +36,6 @@ class HomeController with ChangeNotifier {
 
   String? _currentSearchQuery;
   String? get currentSearchQuery => _currentSearchQuery;
-
-  // Fitur sorting dari API lama kita hilangkan sementara karena API baru tidak menentukannya
-  // di endpoint publik.
-  // String _currentSortBy = 'publishedAt';
-  // String get currentSortBy => _currentSortBy;
-  // final Map<String, String> sortByOptionsDisplay = const { ... };
 
   HomeController() {
     fetchArticlesByCategory(_selectedCategory);
@@ -71,31 +63,44 @@ class HomeController with ChangeNotifier {
     }
   }
 
-  // --- GANTI NAMA FUNGSI & LOGIKANYA ---
+  // --- FUNGSI INI DIPERBARUI DENGAN LOGIKA SIMULASI ---
   Future<void> fetchArticlesByCategory(String category) async {
     _selectedCategory = category;
     _isSearchActive = false;
     _currentSearchQuery = null;
     _setLoading(true);
     _setError(null);
-    _articles = [];
+    _articles = []; // Kosongkan daftar agar loading indicator terlihat
+    notifyListeners();
 
     try {
-      // Jika kategori adalah 'All News', kita tidak mengirim parameter kategori
+      // Tentukan kategori yang akan dikirim ke API
       String? apiCategory = category.toLowerCase() == "all news"
           ? null
           : category;
 
-      // Gunakan method fetchTopHeadlines yang sudah kita modifikasi
+      print("Mencoba mengambil berita untuk kategori: $apiCategory");
       _articles = await _newsApiService.fetchTopHeadlines(
         category: apiCategory,
       );
-      await _loadBookmarkedStatus();
     } catch (e) {
-      _setError(e.toString());
-      _articles = [];
+      // JIKA GAGAL: jangan tampilkan error, tapi jalankan simulasi
+      print(
+        "Gagal mengambil kategori '$category'. Menjalankan fallback ke 'All News'. Error: $e",
+      );
+
+      try {
+        // Ambil berita "All News" sebagai gantinya
+        _articles = await _newsApiService.fetchTopHeadlines(category: null);
+      } catch (fallbackError) {
+        // Jika fallback juga gagal, baru tampilkan error
+        print("Fallback ke 'All News' juga gagal: $fallbackError");
+        _setError(fallbackError.toString());
+      }
     } finally {
-      _setLoading(false);
+      // Muat status bookmark untuk artikel yang berhasil ditampilkan
+      await _loadBookmarkedStatus();
+      _setLoading(false); // Hentikan loading dan perbarui UI
     }
   }
 
@@ -108,13 +113,12 @@ class HomeController with ChangeNotifier {
 
     _currentSearchQuery = trimmedQuery;
     _isSearchActive = true;
-    _selectedCategory = ""; // Kosongkan kategori saat mencari
+    _selectedCategory = "";
     _setLoading(true);
     _setError(null);
     _articles = [];
 
     try {
-      // Gunakan method searchNews yang sudah kita modifikasi
       _articles = await _newsApiService.searchNews(trimmedQuery);
       await _loadBookmarkedStatus();
     } catch (e) {
@@ -124,9 +128,6 @@ class HomeController with ChangeNotifier {
       _setLoading(false);
     }
   }
-
-  // Fungsi sorting kita non-aktifkan
-  // Future<void> setSortOrder(String newSortBy) async { ... }
 
   void onCategorySelected(String category) {
     if (_selectedCategory != category || _articles.isEmpty || _isSearchActive) {

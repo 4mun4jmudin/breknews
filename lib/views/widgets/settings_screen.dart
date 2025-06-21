@@ -1,4 +1,6 @@
 // lib/views/widgets/settings_screen.dart
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -22,27 +24,41 @@ class SettingsScreen extends StatelessWidget {
 
     return ListTile(
       leading: Icon(icon, color: theme.colorScheme.primary, size: 26),
-      title: Text(title,
-          style: textTheme.titleMedium?.copyWith(
-              color: textTheme.bodyLarge?.color, fontWeight: helper.medium)),
+      title: Text(
+        title,
+        style: textTheme.titleMedium?.copyWith(
+          color: textTheme.bodyLarge?.color,
+          fontWeight: helper.medium,
+        ),
+      ),
       subtitle: subtitle != null
-          ? Text(subtitle,
+          ? Text(
+              subtitle,
               style: textTheme.bodySmall?.copyWith(
-                  color: textTheme.bodySmall?.color?.withOpacity(0.7)))
+                color: textTheme.bodySmall?.color?.withOpacity(0.7),
+              ),
+            )
           : null,
-      trailing: trailing ??
+      trailing:
+          trailing ??
           (onTap != null
-              ? Icon(Icons.arrow_forward_ios_rounded,
-                  size: 18, color: theme.hintColor)
+              ? Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 18,
+                  color: theme.hintColor,
+                )
               : null),
-      onTap: onTap ??
+      onTap:
+          onTap ??
           () {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Fitur "$title" belum tersedia.')),
             );
           },
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 4.0,
+      ),
     );
   }
 
@@ -57,14 +73,13 @@ class SettingsScreen extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: theme.appBarTheme.foregroundColor),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: theme.appBarTheme.foregroundColor,
+          ),
           onPressed: () => context.pop(),
         ),
-        title: Text(
-          'Pengaturan',
-          style: theme.appBarTheme.titleTextStyle,
-        ),
+        title: Text('Pengaturan', style: theme.appBarTheme.titleTextStyle),
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: theme.appBarTheme.elevation,
       ),
@@ -72,11 +87,17 @@ class SettingsScreen extends StatelessWidget {
         children: <Widget>[
           helper.vsMedium,
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text("Tampilan",
-                style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold, color: colorScheme.primary)),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
+            child: Text(
+              "Tampilan",
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.primary,
+              ),
+            ),
           ),
           _buildSettingsItem(
             context,
@@ -84,8 +105,10 @@ class SettingsScreen extends StatelessWidget {
             title: "Mode Tema",
             trailing: DropdownButton<ThemeMode>(
               value: themeController.themeMode,
-              icon: Icon(Icons.keyboard_arrow_down_rounded,
-                  color: theme.hintColor),
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: theme.hintColor,
+              ),
               underline: const SizedBox.shrink(),
               dropdownColor: theme.cardColor,
               items: [
@@ -93,31 +116,36 @@ class SettingsScreen extends StatelessWidget {
                   value: ThemeMode.system,
                   child: Text(
                     "Sistem",
-                    style: textTheme.titleMedium
-                        ?.copyWith(color: textTheme.bodyLarge?.color),
+                    style: textTheme.titleMedium?.copyWith(
+                      color: textTheme.bodyLarge?.color,
+                    ),
                   ),
                 ),
                 DropdownMenuItem(
                   value: ThemeMode.light,
                   child: Text(
                     "Terang",
-                    style: textTheme.titleMedium
-                        ?.copyWith(color: textTheme.bodyLarge?.color),
+                    style: textTheme.titleMedium?.copyWith(
+                      color: textTheme.bodyLarge?.color,
+                    ),
                   ),
                 ),
                 DropdownMenuItem(
                   value: ThemeMode.dark,
                   child: Text(
                     "Gelap",
-                    style: textTheme.titleMedium
-                        ?.copyWith(color: textTheme.bodyLarge?.color),
+                    style: textTheme.titleMedium?.copyWith(
+                      color: textTheme.bodyLarge?.color,
+                    ),
                   ),
                 ),
               ],
               onChanged: (ThemeMode? newMode) {
                 if (newMode != null) {
-                  Provider.of<ThemeController>(context, listen: false)
-                      .setTheme(newMode);
+                  Provider.of<ThemeController>(
+                    context,
+                    listen: false,
+                  ).setTheme(newMode);
                 }
               },
             ),
@@ -129,12 +157,16 @@ class SettingsScreen extends StatelessWidget {
             color: theme.dividerColor.withOpacity(0.5),
           ),
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Text(
               "Akun",
               style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold, color: colorScheme.primary),
+                fontWeight: FontWeight.bold,
+                color: colorScheme.primary,
+              ),
             ),
           ),
           _buildSettingsItem(
@@ -155,21 +187,29 @@ class SettingsScreen extends StatelessWidget {
                 // TODO: Logika untuk mengubah status notifikasi
               },
 
-              activeTrackColor:
-                  colorScheme.primary.withOpacity(0.5), // Opsional
+              activeTrackColor: colorScheme.primary.withOpacity(
+                0.5,
+              ), // Opsional
             ),
             onTap: null,
           ),
           Divider(
-              indent: 16,
-              endIndent: 16,
-              color: theme.dividerColor.withOpacity(0.5)),
+            indent: 16,
+            endIndent: 16,
+            color: theme.dividerColor.withOpacity(0.5),
+          ),
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text("Tentang Aplikasi",
-                style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold, color: colorScheme.primary)),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
+            child: Text(
+              "Tentang Aplikasi",
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.primary,
+              ),
+            ),
           ),
           _buildSettingsItem(
             context,
@@ -196,9 +236,10 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           Divider(
-              indent: 16,
-              endIndent: 16,
-              color: theme.dividerColor.withOpacity(0.5)),
+            indent: 16,
+            endIndent: 16,
+            color: theme.dividerColor.withOpacity(0.5),
+          ),
           _buildSettingsItem(
             context,
             icon: Icons.delete_forever_outlined,

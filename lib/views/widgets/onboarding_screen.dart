@@ -1,4 +1,6 @@
 // lib/views/widgets/onboarding_screen.dart
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -97,53 +99,84 @@ class OnboardingScreen extends StatelessWidget {
         builder: (context, controller, child) {
           final currentPageData = controller.pages[controller.currentPage];
           final Color currentDominantColor = currentPageData.dominantColor;
+          final bool isLastPage =
+              controller.currentPage == controller.totalPages - 1;
 
           return Scaffold(
-            body: Column(
-              children: <Widget>[
-                Expanded(
-                  child: PageView.builder(
-                    controller: controller.pageController,
-                    onPageChanged: controller.onPageChanged,
-                    itemCount: controller.totalPages,
-                    itemBuilder: (context, index) {
-                      final pageData = controller.pages[index];
-                      return _OnboardingPageContentWidget(
-                        key: ValueKey('onboarding_page_$index'),
-                        backgroundImagePath: pageData.backgroundImagePath,
-                        foregroundImagePath: pageData.foregroundImagePath,
-                        title: pageData.title,
-                        description: pageData.description,
-                        dominantColor: pageData.dominantColor,
-                        backgroundColor: pageData.backgroundColor,
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.0,
-                    vertical: MediaQuery.of(context).padding.bottom > 0
-                        ? 24.0
-                        : 32.0,
-                  ),
-                  child: Column(
-                    children: [
-                      _buildPageIndicator(
-                        controller,
-                        currentDominantColor,
-                        appTheme,
+            // --- PERUBAHAN UTAMA: MENGGUNAKAN STACK ---
+            body: Stack(
+              children: [
+                // Konten utama (PageView dan tombol bawah)
+                Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: PageView.builder(
+                        controller: controller.pageController,
+                        onPageChanged: controller.onPageChanged,
+                        itemCount: controller.totalPages,
+                        itemBuilder: (context, index) {
+                          final pageData = controller.pages[index];
+                          return _OnboardingPageContentWidget(
+                            key: ValueKey('onboarding_page_$index'),
+                            backgroundImagePath: pageData.backgroundImagePath,
+                            foregroundImagePath: pageData.foregroundImagePath,
+                            title: pageData.title,
+                            description: pageData.description,
+                            dominantColor: pageData.dominantColor,
+                            backgroundColor: pageData.backgroundColor,
+                          );
+                        },
                       ),
-                      SizedBox(height: controller.totalPages > 1 ? 30.0 : 0),
-                      _buildNavigationButton(
-                        context,
-                        controller,
-                        currentDominantColor,
-                        appTheme,
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: MediaQuery.of(context).padding.bottom > 0
+                            ? 24.0
+                            : 32.0,
                       ),
-                    ],
-                  ),
+                      child: Column(
+                        children: [
+                          _buildPageIndicator(
+                            controller,
+                            currentDominantColor,
+                            appTheme,
+                          ),
+                          SizedBox(
+                            height: controller.totalPages > 1 ? 30.0 : 0,
+                          ),
+                          _buildNavigationButton(
+                            context,
+                            controller,
+                            currentDominantColor,
+                            appTheme,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
+                // --- TOMBOL SKIP DITAMBAHKAN DI SINI ---
+                // Tombol ini hanya muncul jika bukan halaman terakhir
+                if (!isLastPage)
+                  Positioned(
+                    top: MediaQuery.of(context).padding.top + 8,
+                    right: 16,
+                    child: TextButton(
+                      onPressed: () {
+                        // Langsung navigasi ke halaman login
+                        context.goNamed(RouteName.login);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.black.withOpacity(0.2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text('Skip'),
+                    ),
+                  ),
               ],
             ),
           );

@@ -165,4 +165,16 @@ class LocalArticleController with ChangeNotifier {
       );
     }
   }
+
+  Future<void> addNewlyCreatedArticle(Article article) async {
+    // Masukkan artikel baru ke posisi paling atas dalam daftar
+    _localArticlesList.insert(0, article);
+    // Simpan daftar yang sudah diperbarui ke SharedPreferences
+    await _saveArticlesToPrefs();
+    // Beri tahu UI untuk memperbarui dirinya
+    notifyListeners();
+    debugPrint(
+      'Artikel baru dari server berhasil disimpan secara lokal: ${article.title}',
+    );
+  }
 }

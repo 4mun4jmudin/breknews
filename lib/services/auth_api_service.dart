@@ -2,79 +2,70 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/api_config.dart'; // Impor file konfigurasi
+import '../config/api_config.dart';
 
 class AuthApiService {
-  // Fungsi untuk login
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('${ApiConfig.baseUrl}api/auth/login'),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: json.encode({'email': email, 'password': password}),
       );
 
-      // Selalu decode JSON, terlepas dari status code
-      final data = json.decode(response.body);
+      final responseBody = json.decode(response.body);
 
-      // Periksa status code DAN isi respons
-      if (response.statusCode == 200) {
-        // Cek jika body berisi pesan sukses dari API Anda
-        // Mungkin API Anda punya format seperti: { "success": true, "token": "..." }
-        if (data['token'] != null) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('jwt_token', data['token']);
-          return {'success': true, 'message': 'Login berhasil!'};
+      if (response.statusCode == 200 &&
+          responseBody['body']['success'] == true) {
+        final data = responseBody['body']['data'];
+        final author = data['author'];
+        final token = data['token'];
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', token);
+        await prefs.setString('currentUserId', author['id']);
+        await prefs.setString(
+          'currentUsername',
+          "${author['firstName']} ${author['lastName']}",
+        );
+        await prefs.setString('currentUserEmail', author['email']);
+
+        // --- TAMBAHAN: Simpan URL avatar dari API ---
+        // Jika avatarUrl null dari API, akan disimpan sebagai null. Ini sudah benar.
+        if (author['avatarUrl'] != null) {
+          await prefs.setString('currentUserAvatarUrl', author['avatarUrl']);
+        } else {
+          // Pastikan key lama dihapus jika API mengembalikan null
+          await prefs.remove('currentUserAvatarUrl');
         }
-      }
 
-      // Jika statusCode bukan 200 atau tidak ada token, anggap gagal.
-      // Coba ambil pesan error dari body.
-      String errorMessage =
-          data['body']?['message'] ??
-          data['message'] ??
-          'Terjadi kesalahan yang tidak diketahui.';
-      return {'success': false, 'message': errorMessage};
+        print('Login berhasil, token dan data pengguna disimpan.');
+
+        return {'success': true, 'message': 'Login berhasil!'};
+      } else {
+        String errorMessage =
+            responseBody['body']?['message'] ?? 'Email atau password salah.';
+        return {'success': false, 'message': errorMessage};
+      }
     } catch (e) {
-      print('Error di AuthApiService: $e');
-      return {'success': false, 'message': 'Tidak dapat terhubung ke server.'};
+      print('Error pada AuthApiService: $e');
+      return {
+        'success': false,
+        'message': 'Tidak dapat terhubung ke server. Silakan coba lagi.',
+      };
     }
   }
 
-  // **PENTING**: Fungsi untuk Registrasi (Placeholder)
-  // API Anda belum memiliki endpoint registrasi. Anda perlu membuatnya terlebih dahulu di backend.
-  // Misalnya: POST /api/auth/register
+  // Fungsi registrasi ini tetap dinonaktifkan karena tidak ada endpoint API
   Future<Map<String, dynamic>> register(
     String username,
     String email,
     String password,
   ) async {
-    // try {
-    //   final response = await http.post(
-    //     Uri.parse('${ApiConfig.baseUrl}/api/auth/register'), // Endpoint ini perlu dibuat di backend Anda
-    //     headers: {'Content-Type': 'application/json'},
-    //     body: json.encode({
-    //       'username': username,
-    //       'email': email,
-    //       'password': password,
-    //     }),
-    //   );
-    //
-    //   if (response.statusCode == 201) { // 201 Created
-    //     return {'success': true, 'message': 'Registrasi berhasil! Silakan login.'};
-    //   } else {
-    //     final errorData = json.decode(response.body);
-    //     return {'success': false, 'message': errorData['message'] ?? 'Registrasi gagal.'};
-    //   }
-    // } catch (e) {
-    //   return {'success': false, 'message': 'Tidak dapat terhubung ke server.'};
-    // }
-    await Future.delayed(
-      const Duration(seconds: 1),
-    ); // Hapus ini setelah endpoint siap
+    await Future.delayed(const Duration(seconds: 1));
     return {
       'success': false,
-      'message': 'Fitur registrasi via API belum siap.',
+      'message': 'Fitur registrasi belum tersedia saat ini.',
     };
   }
 }

@@ -32,12 +32,14 @@ class AppValidators {
   }
 
   static String? validatePassword(String? value) {
-    if (value!.isEmpty) {
+    if (value == null || value.isEmpty) {
       return 'Password can\'t be empty';
     } else if (value.length < 8) {
       return 'Password can\'t be less than 8 characters';
-    } else if (!RegExp(r'^(?=.*[a-z])(?=.*[0-9]).{8,}$').hasMatch(value)) {
-      return 'Password must be 8 - 16 characters long and contain alphabets and numbers';
+    } else if (!RegExp(
+      r'^(?=.*[a-zA-Z])(?=.*[!@#\$&*~_.,;:?\-^%+=(){}\[\]|\\/<>]).{8,}$',
+    ).hasMatch(value)) {
+      return 'Password must be at least 8 characters and contain letters and special characters';
     } else {
       return null;
     }

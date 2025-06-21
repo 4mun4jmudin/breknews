@@ -14,17 +14,21 @@ class MainScaffold extends StatelessWidget {
     final String location = state.uri.toString();
 
     if (currentRouteName == RouteName.home ||
-        location.startsWith('/${RouteName.home}'))
+        location.startsWith('/${RouteName.home}')) {
       return 0;
+    }
     if (currentRouteName == RouteName.bookmark ||
-        location.startsWith('/${RouteName.bookmark}'))
+        location.startsWith('/${RouteName.bookmark}')) {
       return 1;
+    }
     if (currentRouteName == RouteName.localArticles ||
-        location.startsWith('/${RouteName.localArticles}'))
+        location.startsWith('/${RouteName.localArticles}')) {
       return 2;
+    }
     if (currentRouteName == RouteName.profile ||
-        location.startsWith('/${RouteName.profile}'))
+        location.startsWith('/${RouteName.profile}')) {
       return 3;
+    }
 
     if (currentRouteName == RouteName.addLocalArticle) return -1;
 

@@ -1,4 +1,6 @@
 // lib/views/widgets/reset_password_screen.dart
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+
 import 'package:breaknews/views/utils/form_validaror.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -35,24 +37,31 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(labelText,
-            style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.textTheme.bodyMedium?.color,
-                fontWeight: helper.medium)),
+        Text(
+          labelText,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: theme.textTheme.bodyMedium?.color,
+            fontWeight: helper.medium,
+          ),
+        ),
         helper.vsSuperTiny,
         TextFormField(
           controller: controller,
           obscureText: !isVisible,
           validator: validator,
-          style: theme.textTheme.titleMedium
-              ?.copyWith(color: theme.textTheme.bodyLarge?.color),
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.textTheme.bodyLarge?.color,
+          ),
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle:
-                theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
-            prefixIcon: Icon(Icons.lock_outline_rounded,
-                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                size: 22),
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.hintColor,
+            ),
+            prefixIcon: Icon(
+              Icons.lock_outline_rounded,
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+              size: 22,
+            ),
             suffixIcon: IconButton(
               icon: Icon(
                 isVisible
@@ -67,23 +76,34 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 ? Colors.grey.shade800.withOpacity(0.5)
                 : helper.cGrey.withOpacity(0.7),
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
             enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
             focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: theme.colorScheme.primary, width: 1.5)),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 1.5,
+              ),
+            ),
             errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: theme.colorScheme.error, width: 1.0)),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: theme.colorScheme.error,
+                width: 1.0,
+              ),
+            ),
             focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: theme.colorScheme.error, width: 1.5)),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: theme.colorScheme.error,
+                width: 1.5,
+              ),
+            ),
           ),
           autovalidateMode: AutovalidateMode.onUserInteraction,
         ),
@@ -104,12 +124,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded,
-                color: theme.appBarTheme.foregroundColor),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: theme.appBarTheme.foregroundColor,
+            ),
             onPressed: () => context.pop(),
           ),
-          title:
-              Text('Reset Password', style: theme.appBarTheme.titleTextStyle),
+          title: Text(
+            'Reset Password',
+            style: theme.appBarTheme.titleTextStyle,
+          ),
           backgroundColor: theme.appBarTheme.backgroundColor,
           elevation: theme.appBarTheme.elevation,
         ),
@@ -126,15 +150,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     Text(
                       'Buat Password Baru',
                       style: textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: textTheme.bodyLarge?.color),
+                        fontWeight: FontWeight.bold,
+                        color: textTheme.bodyLarge?.color,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     helper.vsSmall,
                     Text(
                       'Password baru Anda harus berbeda dari password sebelumnya.',
                       style: textTheme.bodyMedium?.copyWith(
-                          color: textTheme.bodyMedium?.color?.withOpacity(0.7)),
+                        color: textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     helper.vsXLarge,
@@ -176,33 +202,37 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Text(
                           controller.errorMessage!,
-                          style: textTheme.bodyMedium
-                              ?.copyWith(color: colorScheme.error),
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.error,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
 
                     // Pesan sukses tidak ditampilkan di sini, tapi melalui dialog jika diperlukan
                     // atau langsung navigasi.
-
                     ElevatedButton(
                       onPressed: controller.isLoading
                           ? null
                           : () async {
                               if (_formKey.currentState!.validate()) {
-                                FocusScope.of(context)
-                                    .unfocus(); // Tutup keyboard
-                                bool success = await controller
-                                    .resetPassword(widget.email);
+                                FocusScope.of(
+                                  context,
+                                ).unfocus(); // Tutup keyboard
+                                bool success = await controller.resetPassword(
+                                  widget.email,
+                                );
                                 if (success && mounted) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                    content: Text(
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
                                         controller.successMessage ??
                                             'Password berhasil direset!',
-                                        style: TextStyle(color: helper.cWhite)),
-                                    backgroundColor: helper.cSuccess,
-                                  ));
+                                        style: TextStyle(color: helper.cWhite),
+                                      ),
+                                      backgroundColor: helper.cSuccess,
+                                    ),
+                                  );
                                   // Arahkan ke halaman login setelah sukses reset password
                                   // Menggunakan goNamed untuk me-replace stack hingga ke login
                                   context.goNamed(RouteName.login);
@@ -211,12 +241,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 // atau bisa juga dengan SnackBar jika _errorMessage di controller tidak null
                                 else if (controller.errorMessage != null &&
                                     mounted) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                    content: Text(controller.errorMessage!,
-                                        style: TextStyle(color: helper.cWhite)),
-                                    backgroundColor: helper.cError,
-                                  ));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        controller.errorMessage!,
+                                        style: TextStyle(color: helper.cWhite),
+                                      ),
+                                      backgroundColor: helper.cError,
+                                    ),
+                                  );
                                 }
                               }
                             },
@@ -225,7 +258,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         foregroundColor: colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         textStyle: textTheme.labelLarge,
                       ),
                       child: controller.isLoading
@@ -233,9 +267,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white)))
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
                           : const Text('Simpan Password Baru'),
                     ),
                   ],

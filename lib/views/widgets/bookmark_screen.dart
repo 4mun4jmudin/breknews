@@ -1,4 +1,6 @@
 // lib/views/widgets/bookmark_screen.dart
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 // import 'package:go_router/go_router.dart';
@@ -89,7 +91,6 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           helper.hsMedium,
           InkWell(
             onTap: () {
-              // TODO: Implement filter functionality for bookmarks if desired
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text(

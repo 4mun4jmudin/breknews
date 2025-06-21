@@ -1,5 +1,7 @@
 //----------------------------------------------------//
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:breaknews/views/widgets/bookmark_screen.dart';
 import 'package:breaknews/views/widgets/edit_profile_screen.dart';
 import 'package:breaknews/views/widgets/forgot_password_screen.dart';
@@ -116,7 +118,8 @@ final GoRouter _router = GoRouter(
               path: 'edit',
               name: RouteName.editProfile,
               builder: (BuildContext context, GoRouterState state) {
-                final int? userId = state.extra as int?;
+                final String? userId = state.extra as String?;
+
                 if (userId != null) {
                   return EditProfileScreen(userId: userId);
                 } else {

@@ -1,5 +1,7 @@
 // lib/views/widgets/local_articles_screen.dart
 // import 'dart:io';
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/local_article_controller.dart';

@@ -1,4 +1,6 @@
 // lib/views/widgets/news_detail_screen.dart
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io'; // Import untuk File
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';

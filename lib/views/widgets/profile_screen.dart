@@ -1,4 +1,6 @@
 // lib/views/widgets/profile_screen.dart
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 import 'dart:ui'; // Untuk ImageFilter.blur
 import 'package:flutter/material.dart';
@@ -8,7 +10,18 @@ import 'package:go_router/go_router.dart';
 import '../../controllers/profile_controller.dart';
 import '../utils/helper.dart' as helper;
 import '../../routes/route_name.dart';
-import '../../services/database_helper.dart';
+
+// Kelas DatabaseHelper tidak lagi digunakan secara langsung, tapi nama kolomnya
+// kita pakai untuk menjaga kompatibilitas dengan data map di controller.
+class _DbColumnNames {
+  static const columnId = '_id';
+  static const columnUsername = 'username';
+  static const columnEmail = 'email';
+  static const columnPhoneNumber = 'phone_number';
+  static const columnAddress = 'address';
+  static const columnCity = 'city';
+  static const columnProfilePicturePath = 'profile_picture_path';
+}
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,6 +31,61 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  // --- WIDGET HELPER BARU UNTUK MENAMPILKAN GAMBAR ---
+  // Mampu menampilkan gambar dari URL internet atau dari file lokal.
+  Widget _buildProfileImage(String? path, {double? width, double? height}) {
+    // Tampilan default jika tidak ada path gambar.
+    if (path == null || path.isEmpty) {
+      return Icon(
+        Icons.person_rounded,
+        size: 60,
+        color: helper.cWhite.withOpacity(0.8),
+      );
+    }
+
+    // Cek apakah path adalah URL internet.
+    if (path.startsWith('http')) {
+      return Image.network(
+        path,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        // Tampilan jika terjadi error saat memuat gambar dari URL.
+        errorBuilder: (context, error, stackTrace) => Icon(
+          Icons.person_rounded,
+          size: 60,
+          color: helper.cWhite.withOpacity(0.8),
+        ),
+        // Tampilan loading saat gambar dari URL sedang dimuat.
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
+        },
+      );
+    } else {
+      // Jika bukan URL, anggap sebagai path file lokal.
+      final imageFile = File(path);
+      // Cek apakah file tersebut ada di perangkat sebelum menampilkannya.
+      if (imageFile.existsSync()) {
+        return Image.file(
+          imageFile,
+          width: width,
+          height: height,
+          fit: BoxFit.cover,
+        );
+      } else {
+        // Tampilan jika file lokal tidak ditemukan.
+        return Icon(
+          Icons.person_rounded,
+          size: 60,
+          color: helper.cWhite.withOpacity(0.8),
+        );
+      }
+    }
+  }
+
   Widget _buildProfileDetailRow(
     BuildContext context,
     IconData icon,
@@ -115,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final Color headerTextColor = helper.cWhite;
 
     return ChangeNotifierProvider(
-      create: (_) => ProfileController()..loadUserProfile(),
+      create: (_) => ProfileController(),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
@@ -133,16 +201,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         body: Consumer<ProfileController>(
           builder: (context, controller, child) {
-            if (controller.isLoading && controller.userData == null) {
+            if (controller.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (controller.errorMessage != null &&
-                controller.userData == null) {
+            if (controller.errorMessage != null) {
               return Center(
-                child: Text(
-                  controller.errorMessage!,
-                  style: textTheme.titleMedium?.copyWith(
-                    color: Colors.redAccent,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    controller.errorMessage!,
+                    textAlign: TextAlign.center,
+                    style: textTheme.titleMedium?.copyWith(
+                      color: Colors.redAccent,
+                    ),
                   ),
                 ),
               );
@@ -158,19 +229,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             final userData = controller.userData!;
             String displayName =
-                userData[DatabaseHelper.columnUsername] as String? ??
+                userData[_DbColumnNames.columnUsername] as String? ??
                 'Nama Pengguna';
             String displayEmail =
-                userData[DatabaseHelper.columnEmail] as String? ??
+                userData[_DbColumnNames.columnEmail] as String? ??
                 'email@example.com';
             String? profilePicPath =
-                userData[DatabaseHelper.columnProfilePicturePath] as String?;
+                userData[_DbColumnNames.columnProfilePicturePath] as String?;
             String displayPhoneNumber =
-                userData[DatabaseHelper.columnPhoneNumber] as String? ?? "";
+                userData[_DbColumnNames.columnPhoneNumber] as String? ?? "";
             String displayAddress =
-                userData[DatabaseHelper.columnAddress] as String? ?? "";
+                userData[_DbColumnNames.columnAddress] as String? ?? "";
             String displayCity =
-                userData[DatabaseHelper.columnCity] as String? ?? "";
+                userData[_DbColumnNames.columnCity] as String? ?? "";
 
             return RefreshIndicator(
               onRefresh: () => controller.refreshProfile(),
@@ -196,31 +267,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       background: Stack(
                         fit: StackFit.expand,
                         children: [
-                          // Gambar latar belakang profil
-                          profilePicPath != null && profilePicPath.isNotEmpty
-                              ? Image.file(
-                                  File(profilePicPath),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Image.asset(
-                                        'assets/bgf.jpg',
-                                        fit: BoxFit.cover,
-                                      ),
-                                )
-                              : Image.asset(
-                                  'assets/bgf.jpg',
-                                  fit: BoxFit.cover,
-                                ),
-
-                          BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.4),
+                          // Gambar latar belakang profil dengan efek blur
+                          ClipRect(
+                            child: ImageFiltered(
+                              imageFilter: ImageFilter.blur(
+                                sigmaX: 2.0,
+                                sigmaY: 2.0,
+                              ),
+                              child: _buildProfileImage(
+                                profilePicPath,
+                                width: double.infinity,
+                                height: double.infinity,
                               ),
                             ),
                           ),
 
+                          // Lapisan gelap untuk keterbacaan teks
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.4),
+                            ),
+                          ),
+
+                          // Konten di tengah (Avatar dan Teks)
                           Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -230,22 +299,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   backgroundColor: theme.cardColor.withOpacity(
                                     0.5,
                                   ),
-                                  backgroundImage:
-                                      (profilePicPath != null &&
-                                          profilePicPath.isNotEmpty)
-                                      ? FileImage(File(profilePicPath))
-                                      : null,
-                                  child:
-                                      (profilePicPath == null ||
-                                          profilePicPath.isEmpty)
-                                      ? Icon(
-                                          Icons.person_rounded,
-                                          size: 60,
-                                          color: headerTextColor.withOpacity(
-                                            0.8,
-                                          ),
-                                        )
-                                      : null,
+                                  // Menggunakan child agar bisa menampilkan
+                                  // gambar dari URL atau file lokal
+                                  child: ClipOval(
+                                    child: SizedBox(
+                                      width: 110,
+                                      height: 110,
+                                      child: _buildProfileImage(profilePicPath),
+                                    ),
+                                  ),
                                 ),
                                 helper.vsMedium,
                                 Text(
@@ -358,14 +420,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       Icons.edit_attributes_outlined,
                                       "Edit Profile",
                                       onTap: () async {
-                                        /* ... logika edit ... */
-                                        final int? currentUserId = controller
-                                            .userData?[DatabaseHelper.columnId];
+                                        // Ambil userId dari controller
+                                        // Meskipun sekarang String, halaman edit mungkin masih bisa menerimanya jika diadaptasi
+                                        final String? currentUserId = controller
+                                            .userData?[_DbColumnNames.columnId];
                                         if (currentUserId != null) {
+                                          // TODO: Pastikan EditProfileScreen bisa menerima ID String
+                                          // Untuk saat ini, kita anggap bisa
                                           final bool? profileWasUpdated =
                                               await context.pushNamed<bool>(
                                                 RouteName.editProfile,
-                                                extra: currentUserId,
+                                                extra:
+                                                    currentUserId, // Kirim ID sebagai string
                                               );
                                           if (profileWasUpdated == true &&
                                               mounted) {
@@ -393,7 +459,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                     _buildActionItem(
                                       context,
-                                      Icons.settings_outlined, // Ikon baru
+                                      Icons.settings_outlined,
                                       "Pengaturan",
                                       onTap: () =>
                                           context.pushNamed(RouteName.settings),
