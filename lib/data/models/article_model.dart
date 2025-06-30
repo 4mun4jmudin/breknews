@@ -9,7 +9,8 @@ class Article {
   final String? urlToImage;
   final DateTime? publishedAt;
   final String? content;
-  final String? slug; // Tambahan field untuk slug
+  final String? slug;
+  final String? category;
 
   Article({
     this.sourceId,
@@ -22,30 +23,24 @@ class Article {
     this.publishedAt,
     this.content,
     this.slug,
+    this.category,
   });
 
   factory Article.fromJson(Map<String, dynamic> json) {
     return Article(
-      sourceId:
-          json['id'] as String?, // Gunakan 'id' dari artikel sebagai sourceId
-      sourceName:
-          json['author_name'] as String? ??
-          'Sumber tidak diketahui', // Langsung ambil dari 'author_name'
-      author:
-          json['author_name'] as String?, // Langsung ambil dari 'author_name'
+      sourceId: json['id'] as String?,
+      sourceName: json['author_name'] as String? ?? 'Sumber tidak diketahui',
+      author: json['author_name'] as String?,
       title: json['title'] as String? ?? 'Tanpa Judul',
       description: json['summary'] as String? ?? json['content'] as String?,
       url: json['slug'] != null ? '/api/news/${json['slug']}' : null,
-      urlToImage:
-          json['featured_image_url']
-              as String?, // Sesuaikan dengan key 'featured_image_url'
-      publishedAt:
-          json['published_at'] !=
-              null // Prioritaskan 'published_at'
+      urlToImage: json['featured_image_url'] as String?,
+      publishedAt: json['published_at'] != null
           ? DateTime.tryParse(json['published_at'] as String)
           : null,
       content: json['content'] as String?,
       slug: json['slug'] as String?,
+      category: json['category'] as String?,
     );
   }
 
@@ -60,6 +55,7 @@ class Article {
       'publishedAt': publishedAt?.toIso8601String(),
       'content': content,
       'slug': slug,
+      'category': category,
     };
   }
 }

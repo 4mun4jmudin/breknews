@@ -1,6 +1,5 @@
-// lib/services/news_api_service.dart
 import 'dart:convert';
-// import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/models/article_model.dart';
@@ -19,10 +18,9 @@ class NewsApiService {
     return headers;
   }
 
-  // --- FUNGSI INI DIPERBARUI DENGAN LOGIKA PARSING BARU ---
   Future<List<Article>> fetchTopHeadlines({String? category}) async {
     String url = '${ApiConfig.baseUrl}api/news';
-    Map<String, String> queryParams = {'limit': '20'};
+    Map<String, String> queryParams = {'limit': '50'};
 
     if (category != null &&
         category.isNotEmpty &&
@@ -35,7 +33,7 @@ class NewsApiService {
       url += '?$queryString';
     }
 
-    print('Requesting URL (Top Headlines): $url');
+    debugPrint('Requesting URL (Top Headlines): $url');
 
     try {
       final headers = await _getHeaders();
@@ -43,41 +41,18 @@ class NewsApiService {
 
       if (response.statusCode == 200) {
         final dynamic jsonData = jsonDecode(response.body);
-        List<dynamic>? articlesJson;
-
-        // --- LOGIKA PARSING FLEKSIBEL DIMULAI DI SINI ---
-        if (jsonData is Map<String, dynamic>) {
-          // 1. Cek format ideal: { body: { data: [...] } }
-          if (jsonData.containsKey('body') &&
-              jsonData['body'] is Map &&
-              jsonData['body'].containsKey('data') &&
-              jsonData['body']['data'] is List) {
-            articlesJson = jsonData['body']['data'] as List;
-          }
-          // 2. Cek format alternatif 1: { data: [...] }
-          else if (jsonData.containsKey('data') && jsonData['data'] is List) {
-            articlesJson = jsonData['data'] as List;
-          }
-          // 3. Cek format alternatif 2: { body: [...] }
-          else if (jsonData.containsKey('body') && jsonData['body'] is List) {
-            articlesJson = jsonData['body'] as List;
-          }
-        }
-        // 4. Cek jika seluruh respons adalah sebuah list: [...]
-        else if (jsonData is List) {
-          articlesJson = jsonData;
-        }
-        // --- LOGIKA PARSING FLEKSIBEL SELESAI ---
-
-        if (articlesJson != null) {
-          // Jika daftar artikel ditemukan, proses seperti biasa
+        if (jsonData['body'] != null &&
+            jsonData['body']['success'] == true &&
+            jsonData['body']['data'] is List) {
+          final List<dynamic> articlesJson = jsonData['body']['data'];
           return articlesJson
               .map((json) => Article.fromJson(json as Map<String, dynamic>))
               .toList();
         } else {
-          // Jika setelah semua pengecekan daftar artikel tidak ditemukan, baru lempar error.
-          print("Format respons API tidak dikenali. Body: ${response.body}");
-          throw Exception('Format respons API tidak sesuai.');
+          debugPrint(
+            "Format respons API tidak sesuai atau success:false. Body: ${response.body}",
+          );
+          return [];
         }
       } else {
         throw Exception(
@@ -85,49 +60,55 @@ class NewsApiService {
         );
       }
     } catch (e) {
-      print('Error fetching top headlines: $e');
-      // Kita lempar lagi error-nya agar bisa ditangkap oleh UI
+      debugPrint('Error di fetchTopHeadlines: $e');
       throw Exception('Gagal memuat berita: $e');
     }
   }
 
-  // Fungsi di bawah ini tidak perlu diubah.
+  // --- FUNGSI INI KITA PASTIKAN SUDAH BENAR ---
   Future<List<Article>> searchNews(String query) async {
-    // ... (kode tetap sama)
     if (query.isEmpty) return [];
 
     final String encodedQuery = Uri.encodeComponent(query);
     String url = '${ApiConfig.baseUrl}api/news?search=$encodedQuery&limit=20';
-    print('Requesting URL (Search): $url');
+    debugPrint('Requesting URL (Search): $url');
 
     try {
       final headers = await _getHeaders();
       final response = await http.get(Uri.parse(url), headers: headers);
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonData = jsonDecode(response.body);
 
-        if (jsonData.containsKey('body') &&
-            jsonData['body'] is Map &&
-            jsonData['body'].containsKey('data') &&
+      if (response.statusCode == 200) {
+        final dynamic jsonData = jsonDecode(response.body);
+
+        // Gunakan logika parsing yang sama dengan fetchTopHeadlines
+        if (jsonData['body'] != null &&
+            jsonData['body']['success'] == true &&
             jsonData['body']['data'] is List) {
-          final List articlesJson = jsonData['body']['data'] as List;
+          final List<dynamic> articlesJson = jsonData['body']['data'];
           return articlesJson
               .map((json) => Article.fromJson(json as Map<String, dynamic>))
               .toList();
         } else {
-          throw Exception('Format respons API tidak sesuai.');
+          debugPrint(
+            "Respons pencarian tidak valid atau success:false. Body: ${response.body}",
+          );
+          // Jika format tidak valid, kembalikan daftar kosong
+          return [];
         }
       } else {
+        // Jika status code bukan 200 (misal: 500), lempar error
         throw Exception(
-          'Gagal mencari berita: Server merespons dengan status code ${response.statusCode}',
+          'Pencarian gagal: Server merespons dengan status code ${response.statusCode}',
         );
       }
     } catch (e) {
-      print('Error searching news: $e');
-      throw Exception('Gagal mencari berita: $e');
+      debugPrint('Error di searchNews: $e');
+      // Lempar lagi error-nya agar bisa ditangkap oleh controller
+      throw Exception('Gagal melakukan pencarian: $e');
     }
   }
 
+  // Sisa file tidak perlu diubah...
   Future<Map<String, dynamic>> addArticle({
     required String title,
     required String content,
@@ -138,7 +119,6 @@ class NewsApiService {
     try {
       final headers = await _getHeaders();
       var uri = Uri.parse('${ApiConfig.baseUrl}api/author/news');
-
       final body = json.encode({
         "title": title,
         "summary": content.length > 150 ? content.substring(0, 150) : content,
@@ -148,27 +128,19 @@ class NewsApiService {
         "tags": tags,
         "isPublished": true,
       });
-
       var response = await http.post(uri, headers: headers, body: body);
       var responseBody = json.decode(response.body);
-
       if ((response.statusCode == 200 || response.statusCode == 201) &&
           responseBody['body']['success'] == true) {
-        // Jika sukses, parse data artikel dari respons
         final articleData = responseBody['body']['data'];
         final Article createdArticle = Article.fromJson(articleData);
-
-        // Kembalikan objek artikel bersama dengan status sukses
         return {
           'success': true,
           'message': 'Artikel berhasil dipublikasikan!',
-          'article': createdArticle, // <-- KEMBALIKAN OBJEK ARTIKEL
+          'article': createdArticle,
         };
       } else {
-        String errorMessage =
-            responseBody['body']?['message'] ??
-            'Gagal memublikasikan artikel. Status: ${response.statusCode}';
-        return {'success': false, 'message': errorMessage};
+        return {'success': false, 'message': responseBody['body']?['message']};
       }
     } catch (e) {
       return {'success': false, 'message': 'Terjadi kesalahan koneksi: $e'};

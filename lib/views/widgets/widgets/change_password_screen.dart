@@ -21,7 +21,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
 
   Widget _buildPasswordField({
-    required BuildContext context, // Tambahkan BuildContext
+    required BuildContext context,
     required TextEditingController controller,
     required String labelText,
     required String hintText,
@@ -29,7 +29,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     required VoidCallback onVisibilityToggle,
     required String? Function(String?) validator,
   }) {
-    final ThemeData theme = Theme.of(context); // Ambil tema di sini
+    final ThemeData theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -156,7 +156,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       onVisibilityToggle:
                           controller.toggleOldPasswordVisibility,
                       validator: (value) {
-                        // Validator sederhana, validasi utama ada di controller
                         if (value == null || value.isEmpty) {
                           return 'Password lama tidak boleh kosong.';
                         }
@@ -164,7 +163,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       },
                     ),
                     _buildPasswordField(
-                      context: context, // Teruskan context
+                      context: context,
                       controller: controller.newPasswordController,
                       labelText: 'Password Baru',
                       hintText: 'Minimal 8 karakter',
@@ -210,7 +209,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           controller.successMessage!,
                           style: textTheme.bodyMedium?.copyWith(
                             color: helper.cSuccess,
-                          ), // Gunakan warna sukses dari helper
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -219,16 +218,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           ? null
                           : () async {
                               if (_formKey.currentState!.validate()) {
-                                FocusScope.of(
-                                  context,
-                                ).unfocus(); // Tutup keyboard
+                                FocusScope.of(context).unfocus();
                                 bool success = await controller
                                     .changePassword();
                                 if (success && mounted) {
-                                  // Cek mounted
-                                  // Password berhasil diubah, dialog sukses akan muncul dari controller jika ada
-                                  // Anda bisa tambahkan navigasi pop atau pesan lain jika mau
-                                  // Setelah sukses, field sudah di-clear oleh controller
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
@@ -239,17 +232,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                       backgroundColor: helper.cSuccess,
                                     ),
                                   );
-                                  // Mungkin delay sedikit lalu pop? atau biarkan user pop manual
                                   Future.delayed(
                                     const Duration(seconds: 1),
                                     () {
                                       if (mounted) context.pop();
                                     },
                                   );
-                                }
-                                // Pesan error sudah dihandle dengan _errorMessage dan ditampilkan di atas tombol
-                                // atau bisa juga dengan SnackBar jika _errorMessage di controller tidak null
-                                else if (controller.errorMessage != null &&
+                                } else if (controller.errorMessage != null &&
                                     mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(

@@ -22,16 +22,13 @@ class LocalArticleController with ChangeNotifier {
   Future<String?> _copyImageToAppDirectory(File originalImageFile) async {
     try {
       final Directory appDocDir = await getApplicationDocumentsDirectory();
-      final String fileName = p.basename(
-        originalImageFile.path,
-      ); // Dapatkan nama file asli
+      final String fileName = p.basename(originalImageFile.path);
       final String newFilePath = p.join(
         appDocDir.path,
         'local_article_images',
         fileName,
       );
 
-      // Buat direktori jika belum ada
       final Directory imageDir = Directory(
         p.join(appDocDir.path, 'local_article_images'),
       );
@@ -41,7 +38,7 @@ class LocalArticleController with ChangeNotifier {
 
       final File newImageFile = await originalImageFile.copy(newFilePath);
       debugPrint('Image copied to: ${newImageFile.path}');
-      return newImageFile.path; // Simpan path absolut dari file yang disalin
+      return newImageFile.path;
     } catch (e) {
       debugPrint('Error copying image: $e');
       return null;
@@ -49,7 +46,6 @@ class LocalArticleController with ChangeNotifier {
   }
 
   Future<void> _saveArticlesToPrefs() async {
-    // ... (logika penyimpanan ke SharedPreferences tetap sama)
     try {
       final prefs = await SharedPreferences.getInstance();
       Map<String, dynamic> dataToSave = {
@@ -68,7 +64,6 @@ class LocalArticleController with ChangeNotifier {
   }
 
   Future<void> _loadArticlesFromPrefs() async {
-    // Tidak perlu set _isLoadingInitialData = true di sini karena sudah di konstruktor
     try {
       final prefs = await SharedPreferences.getInstance();
       String? jsonString = prefs.getString(_localArticlesKey);
@@ -79,7 +74,6 @@ class LocalArticleController with ChangeNotifier {
           _localArticlesList = articlesJson
               .map((json) => Article.fromJson(json as Map<String, dynamic>))
               .toList();
-          // notifyListeners(); // Kita akan panggil setelah _isLoadingInitialData di-set false
           debugPrint(
             'Local articles loaded from SharedPreferences: ${_localArticlesList.length} articles.',
           );
@@ -89,25 +83,20 @@ class LocalArticleController with ChangeNotifier {
       debugPrint('Error loading local articles from SharedPreferences: $e');
       _localArticlesList = [];
     } finally {
-      _isLoadingInitialData =
-          false; // Set false setelah selesai, baik sukses maupun gagal
-      notifyListeners(); // Notifikasi setelah semua state awal siap
+      _isLoadingInitialData = false;
+      notifyListeners();
     }
   }
 
   Future<void> addLocalArticle({
-    // Ubah menjadi async untuk menunggu penyalinan gambar
     required String title,
     required String content,
     String? authorInput,
-    File? imageFile, // Ini adalah File dari image_picker
+    File? imageFile,
   }) async {
-    // Tambahkan async
     String? finalImagePath;
     if (imageFile != null) {
-      finalImagePath = await _copyImageToAppDirectory(
-        imageFile,
-      ); // Tunggu gambar disalin
+      finalImagePath = await _copyImageToAppDirectory(imageFile);
     }
 
     final newArticle = Article(
@@ -117,7 +106,7 @@ class LocalArticleController with ChangeNotifier {
       sourceId: "local_source",
       sourceName: authorInput ?? "Local Entry",
       publishedAt: DateTime.now(),
-      urlToImage: finalImagePath, // Gunakan path yang sudah disalin
+      urlToImage: finalImagePath,
       description: content.length > 150
           ? '${content.substring(0, 147)}...'
           : content,
@@ -125,7 +114,7 @@ class LocalArticleController with ChangeNotifier {
     );
 
     _localArticlesList.insert(0, newArticle);
-    await _saveArticlesToPrefs(); // Tunggu penyimpanan ke prefs juga
+    await _saveArticlesToPrefs();
     notifyListeners();
     debugPrint('Local article added and saved: ${newArticle.title}');
     debugPrint('Image path saved: ${newArticle.urlToImage}');
@@ -133,7 +122,6 @@ class LocalArticleController with ChangeNotifier {
   }
 
   Future<void> removeLocalArticle(Article articleToRemove) async {
-    // Hapus file gambar jika ada sebelum menghapus artikel dari daftar
     if (articleToRemove.urlToImage != null &&
         articleToRemove.urlToImage!.isNotEmpty) {
       try {
@@ -167,11 +155,8 @@ class LocalArticleController with ChangeNotifier {
   }
 
   Future<void> addNewlyCreatedArticle(Article article) async {
-    // Masukkan artikel baru ke posisi paling atas dalam daftar
     _localArticlesList.insert(0, article);
-    // Simpan daftar yang sudah diperbarui ke SharedPreferences
     await _saveArticlesToPrefs();
-    // Beri tahu UI untuk memperbarui dirinya
     notifyListeners();
     debugPrint(
       'Artikel baru dari server berhasil disimpan secara lokal: ${article.title}',

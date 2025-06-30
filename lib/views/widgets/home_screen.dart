@@ -295,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     }
                     return RefreshIndicator(
-                      onRefresh: () =>
+                      onRefresh: () async =>
                           controller.isSearchActive &&
                               controller.currentSearchQuery != null
                           ? controller.searchArticles(
@@ -459,9 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (value.trim().isNotEmpty) {
                   controller.searchArticles(value.trim());
                 } else {
-                  // --- PERUBAHAN DI SINI ---
                   controller.fetchArticlesByCategory(
-                    // Gunakan kategori default yang baru
                     controller.categories.first,
                   );
                 }

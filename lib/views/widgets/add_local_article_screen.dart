@@ -127,11 +127,8 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
 
     if (mounted) {
       if (result['success']) {
-        // --- LOGIKA BARU DITAMBAHKAN DI SINI ---
-        // 1. Ambil objek artikel dari hasil respons
         final Article newArticleFromServer = result['article'];
 
-        // 2. Dapatkan instance LocalArticleController dari Provider
         final localArticleController = Provider.of<LocalArticleController>(
           context,
           listen: false,
@@ -222,7 +219,6 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
                       ),
                       helper.vsLarge,
 
-                      // ... (Sisa form fields tetap sama, tidak perlu diubah)
                       Text(
                         "News Details",
                         style: theme.textTheme.titleMedium?.copyWith(
@@ -388,7 +384,6 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
     );
   }
 
-  // --- Helper widgets dan functions tidak perlu diubah ---
   @override
   void dispose() {
     _titleController.dispose();

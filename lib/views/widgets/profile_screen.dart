@@ -11,8 +11,6 @@ import '../../controllers/profile_controller.dart';
 import '../utils/helper.dart' as helper;
 import '../../routes/route_name.dart';
 
-// Kelas DatabaseHelper tidak lagi digunakan secara langsung, tapi nama kolomnya
-// kita pakai untuk menjaga kompatibilitas dengan data map di controller.
 class _DbColumnNames {
   static const columnId = '_id';
   static const columnUsername = 'username';
@@ -32,9 +30,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   // --- WIDGET HELPER BARU UNTUK MENAMPILKAN GAMBAR ---
-  // Mampu menampilkan gambar dari URL internet atau dari file lokal.
   Widget _buildProfileImage(String? path, {double? width, double? height}) {
-    // Tampilan default jika tidak ada path gambar.
     if (path == null || path.isEmpty) {
       return Icon(
         Icons.person_rounded,
@@ -43,20 +39,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    // Cek apakah path adalah URL internet.
     if (path.startsWith('http')) {
       return Image.network(
         path,
         width: width,
         height: height,
         fit: BoxFit.cover,
-        // Tampilan jika terjadi error saat memuat gambar dari URL.
         errorBuilder: (context, error, stackTrace) => Icon(
           Icons.person_rounded,
           size: 60,
           color: helper.cWhite.withOpacity(0.8),
         ),
-        // Tampilan loading saat gambar dari URL sedang dimuat.
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return const Center(
@@ -65,9 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       );
     } else {
-      // Jika bukan URL, anggap sebagai path file lokal.
       final imageFile = File(path);
-      // Cek apakah file tersebut ada di perangkat sebelum menampilkannya.
       if (imageFile.existsSync()) {
         return Image.file(
           imageFile,
@@ -76,7 +67,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           fit: BoxFit.cover,
         );
       } else {
-        // Tampilan jika file lokal tidak ditemukan.
         return Icon(
           Icons.person_rounded,
           size: 60,
@@ -267,7 +257,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       background: Stack(
                         fit: StackFit.expand,
                         children: [
-                          // Gambar latar belakang profil dengan efek blur
                           ClipRect(
                             child: ImageFiltered(
                               imageFilter: ImageFilter.blur(
@@ -282,14 +271,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
 
-                          // Lapisan gelap untuk keterbacaan teks
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.4),
                             ),
                           ),
 
-                          // Konten di tengah (Avatar dan Teks)
                           Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -299,8 +286,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   backgroundColor: theme.cardColor.withOpacity(
                                     0.5,
                                   ),
-                                  // Menggunakan child agar bisa menampilkan
-                                  // gambar dari URL atau file lokal
                                   child: ClipOval(
                                     child: SizedBox(
                                       width: 110,
@@ -341,7 +326,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Kartu untuk Detail Profil
                             Card(
                               elevation: 3.0,
                               margin: const EdgeInsets.only(bottom: 20.0),
@@ -402,7 +386,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
 
-                            // Kartu untuk Item Aksi
                             Card(
                               elevation: 3.0,
                               shape: RoundedRectangleBorder(
@@ -420,13 +403,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       Icons.edit_attributes_outlined,
                                       "Edit Profile",
                                       onTap: () async {
-                                        // Ambil userId dari controller
-                                        // Meskipun sekarang String, halaman edit mungkin masih bisa menerimanya jika diadaptasi
                                         final String? currentUserId = controller
                                             .userData?[_DbColumnNames.columnId];
                                         if (currentUserId != null) {
-                                          // TODO: Pastikan EditProfileScreen bisa menerima ID String
-                                          // Untuk saat ini, kita anggap bisa
                                           final bool? profileWasUpdated =
                                               await context.pushNamed<bool>(
                                                 RouteName.editProfile,
@@ -481,7 +460,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                             ),
-                            helper.vsLarge, // Spasi di bagian bawah
+                            helper.vsLarge,
                           ],
                         ),
                       ),

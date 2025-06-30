@@ -30,12 +30,9 @@ class AuthApiService {
         );
         await prefs.setString('currentUserEmail', author['email']);
 
-        // --- TAMBAHAN: Simpan URL avatar dari API ---
-        // Jika avatarUrl null dari API, akan disimpan sebagai null. Ini sudah benar.
         if (author['avatarUrl'] != null) {
           await prefs.setString('currentUserAvatarUrl', author['avatarUrl']);
         } else {
-          // Pastikan key lama dihapus jika API mengembalikan null
           await prefs.remove('currentUserAvatarUrl');
         }
 

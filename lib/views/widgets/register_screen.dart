@@ -37,8 +37,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // --- LOGIKA TIDAK BERUBAH ---
-  // Fungsi-fungsi validasi, registrasi, dan dialog tetap sama.
   String? _validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Konfirmasi password tidak boleh kosong';
@@ -89,7 +87,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // --- UI WIDGET DIPERBARUI ---
-  // Widget helper untuk text field, disesuaikan untuk kebutuhan registrasi.
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -99,7 +96,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }) {
     final ThemeData theme = Theme.of(context);
 
-    // Tentukan visibilitas berdasarkan jenis password
     bool isVisible = isConfirmPassword
         ? _isConfirmPasswordVisible
         : _isPasswordVisible;
@@ -179,10 +175,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Bagian Gambar Atas dengan Tepi Melengkung
             ClipPath(
-              clipper:
-                  TopImageClipper(), // Menggunakan clipper yang sama dari login
+              clipper: TopImageClipper(),
               child: SizedBox(
                 height:
                     screenHeight *
@@ -198,7 +192,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
 
-            // Bagian Form Registrasi
             Padding(
               padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 40.0),
               child: Form(
@@ -207,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Create Account', // Judul halaman registrasi
+                      'Create Account',
                       style: textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: colorScheme.onBackground,
@@ -304,7 +297,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // Fungsi dialog dan snackbar tidak perlu diubah
   Future<void> _showSuccessDialogAndNavigate(
     BuildContext context,
     String message,
@@ -368,7 +360,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
-// Class helper untuk membuat efek lengkung pada gambar atas (sama seperti di login)
 class TopImageClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {

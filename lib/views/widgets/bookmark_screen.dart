@@ -91,6 +91,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           helper.hsMedium,
           InkWell(
             onTap: () {
+              // TODO: Implement filter functionality for bookmarks if desired
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text(

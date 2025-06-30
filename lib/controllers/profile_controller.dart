@@ -89,7 +89,7 @@ class ProfileController with ChangeNotifier {
     notifyListeners();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token'); // <-- INI YANG PALING PENTING
+    await prefs.remove('auth_token');
     await prefs.remove('currentUserId');
     await prefs.remove('currentUsername');
     await prefs.remove('currentUserEmail');
