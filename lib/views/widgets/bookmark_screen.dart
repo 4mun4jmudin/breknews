@@ -3,12 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:go_router/go_router.dart';
-
 import '../../controllers/bookmark_controller.dart';
+import '../../controllers/theme_controller.dart';
 import 'news_card_widget.dart';
 import '../utils/helper.dart' as helper;
-// import '../../routes/route_name.dart';
 
 class BookmarkScreen extends StatefulWidget {
   const BookmarkScreen({super.key});
@@ -42,7 +40,6 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
             child: TextField(
               controller: _searchController,
               onSubmitted: (value) {
-                // TODO: Implement search functionality for bookmarks if desired
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -91,7 +88,6 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           helper.hsMedium,
           InkWell(
             onTap: () {
-              // TODO: Implement filter functionality for bookmarks if desired
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text(
@@ -126,6 +122,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
     final ColorScheme colorScheme = theme.colorScheme;
+    final themeController = Provider.of<ThemeController>(context);
 
     return ChangeNotifierProvider(
       create: (_) => BookmarkController(),
@@ -136,35 +133,44 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
             Padding(
               padding: const EdgeInsets.only(
                 left: 16.0,
-                right: 16.0,
+                right: 8.0,
                 top: 20.0,
                 bottom: 8.0,
               ),
               child: Row(
                 children: [
-                  Row(
-                    children: [
-                      Image.asset(
-                        'assets/images/icon.png',
-                        height: 50.0,
-                        width: 50.0,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.newspaper_rounded,
-                            color: theme.colorScheme.primary,
-                            size: 28.0,
-                          );
-                        },
-                      ),
-                      helper.hsLarge,
-                      Text(
-                        "Bookmark",
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  Image.asset(
+                    'assets/images/icon.png',
+                    height: 50.0,
+                    width: 50.0,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.newspaper_rounded,
+                        color: theme.colorScheme.primary,
+                        size: 28.0,
+                      );
+                    },
+                  ),
+                  helper.hsLarge,
+                  Text(
+                    "Bookmark",
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    splashRadius: 20,
+                    icon: Icon(
+                      themeController.themeMode == ThemeMode.dark
+                          ? Icons.light_mode_outlined
+                          : Icons.dark_mode_outlined,
+                      color: theme.colorScheme.primary,
+                    ),
+                    onPressed: () {
+                      themeController.toggleTheme();
+                    },
                   ),
                 ],
               ),
@@ -249,8 +255,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
                         final article = controller.bookmarkedArticles[index];
                         return NewsCardWidget(
                           article: article,
-                          isBookmarked:
-                              true, // All articles here are bookmarked
+                          isBookmarked: true,
                           onBookmarkTap: () {
                             controller.removeArticleFromBookmark(article);
                             ScaffoldMessenger.of(context).showSnackBar(

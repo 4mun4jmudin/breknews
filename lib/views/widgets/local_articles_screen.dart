@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../controllers/local_article_controller.dart';
+import '../../controllers/theme_controller.dart';
 import '../../data/models/article_model.dart';
 import '../utils/helper.dart' as helper;
 import 'news_card_widget.dart';
-import '../../routes/route_name.dart';
+// import '../../routes/route_name.dart';
 
 class LocalArticlesScreen extends StatelessWidget {
   const LocalArticlesScreen({super.key});
@@ -17,6 +18,7 @@ class LocalArticlesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
+    final themeController = Provider.of<ThemeController>(context);
 
     return SafeArea(
       child: Column(
@@ -25,7 +27,7 @@ class LocalArticlesScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(
               left: 16.0,
-              right: 16.0,
+              right: 8.0,
               top: 20.0,
               bottom: 8.0,
             ),
@@ -50,6 +52,19 @@ class LocalArticlesScreen extends StatelessWidget {
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
+                ),
+                const Spacer(),
+                IconButton(
+                  splashRadius: 20,
+                  icon: Icon(
+                    themeController.themeMode == ThemeMode.dark
+                        ? Icons.light_mode_outlined
+                        : Icons.dark_mode_outlined,
+                    color: theme.colorScheme.primary,
+                  ),
+                  onPressed: () {
+                    themeController.toggleTheme();
+                  },
                 ),
               ],
             ),
@@ -120,7 +135,7 @@ class LocalArticlesScreen extends StatelessWidget {
                       final article = controller.myArticles[index];
                       return NewsCardWidget(
                         article: article,
-                        isBookmarked: false, // Bookmark tidak relevan di sini
+                        isBookmarked: false,
                         actions: [
                           IconButton(
                             icon: Icon(
@@ -128,9 +143,8 @@ class LocalArticlesScreen extends StatelessWidget {
                               color: theme.colorScheme.secondary,
                             ),
                             onPressed: () async {
-                              // Navigasi ke layar edit, tunggu hasilnya untuk refresh
                               final result = await context.pushNamed<bool>(
-                                RouteName.editArticle, // Pastikan route ini ada
+                                'editArticle',
                                 extra: article,
                               );
                               if (result == true) {
@@ -151,7 +165,7 @@ class LocalArticlesScreen extends StatelessWidget {
                             ),
                           ),
                         ],
-                        onBookmarkTap: () {}, // Tidak ada aksi bookmark
+                        onBookmarkTap: () {},
                       );
                     },
                   ),
@@ -186,7 +200,9 @@ class LocalArticlesScreen extends StatelessWidget {
                 'Batal',
                 style: TextStyle(color: theme.textTheme.bodyMedium?.color),
               ),
-              onPressed: () => Navigator.of(ctx).pop(),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
             ),
             TextButton(
               child: Text(
@@ -198,7 +214,7 @@ class LocalArticlesScreen extends StatelessWidget {
               ),
               onPressed: () async {
                 final result = await controller.removeArticle(article);
-                Navigator.of(ctx).pop(); // Tutup dialog
+                Navigator.of(ctx).pop();
 
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
