@@ -12,7 +12,7 @@ import '../utils/helper.dart' as helper;
 import '../../routes/route_name.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  final String email; // Email diteruskan dari ForgotPasswordScreen
+  final String email;
 
   const ResetPasswordScreen({super.key, required this.email});
 
@@ -23,7 +23,6 @@ class ResetPasswordScreen extends StatefulWidget {
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Metode helper untuk membangun TextFormField password (mirip ChangePasswordScreen)
   Widget _buildPasswordField({
     required BuildContext context,
     required TextEditingController controller,
@@ -209,16 +208,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
                       ),
 
-                    // Pesan sukses tidak ditampilkan di sini, tapi melalui dialog jika diperlukan
-                    // atau langsung navigasi.
                     ElevatedButton(
                       onPressed: controller.isLoading
                           ? null
                           : () async {
                               if (_formKey.currentState!.validate()) {
-                                FocusScope.of(
-                                  context,
-                                ).unfocus(); // Tutup keyboard
+                                FocusScope.of(context).unfocus();
                                 bool success = await controller.resetPassword(
                                   widget.email,
                                 );
@@ -233,13 +228,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                       backgroundColor: helper.cSuccess,
                                     ),
                                   );
-                                  // Arahkan ke halaman login setelah sukses reset password
-                                  // Menggunakan goNamed untuk me-replace stack hingga ke login
+
                                   context.goNamed(RouteName.login);
-                                }
-                                // Pesan error sudah dihandle dengan _errorMessage dan ditampilkan di atas tombol
-                                // atau bisa juga dengan SnackBar jika _errorMessage di controller tidak null
-                                else if (controller.errorMessage != null &&
+                                } else if (controller.errorMessage != null &&
                                     mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(

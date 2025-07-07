@@ -23,7 +23,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkSessionAndNavigate() async {
-    // Beri sedikit jeda agar splash screen terlihat
     await Future.delayed(const Duration(seconds: 3));
 
     // Pastikan widget masih ada di tree sebelum navigasi
@@ -31,20 +30,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      // Coba dapatkan token dari penyimpanan
       final String? token = prefs.getString('auth_token');
 
       if (token != null && token.isNotEmpty) {
-        // Jika token ada, pengguna sudah login. Langsung ke halaman utama.
         print("Token sesi ditemukan. Mengarahkan ke halaman utama.");
         context.goNamed(RouteName.home);
       } else {
-        // Jika tidak ada token, lanjutkan alur normal ke onboarding/login.
         print("Token sesi tidak ditemukan. Mengarahkan ke halaman perkenalan.");
         context.goNamed(RouteName.introduction);
       }
     } catch (e) {
-      // Jika terjadi error saat membaca shared_preferences, arahkan ke halaman perkenalan sebagai fallback
       print("Terjadi error saat mengecek sesi: $e");
       context.goNamed(RouteName.introduction);
     }

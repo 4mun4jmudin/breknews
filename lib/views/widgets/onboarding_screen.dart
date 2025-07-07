@@ -103,10 +103,8 @@ class OnboardingScreen extends StatelessWidget {
               controller.currentPage == controller.totalPages - 1;
 
           return Scaffold(
-            // --- PERUBAHAN UTAMA: MENGGUNAKAN STACK ---
             body: Stack(
               children: [
-                // Konten utama (PageView dan tombol bawah)
                 Column(
                   children: <Widget>[
                     Expanded(
@@ -156,15 +154,12 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                // --- TOMBOL SKIP DITAMBAHKAN DI SINI ---
-                // Tombol ini hanya muncul jika bukan halaman terakhir
                 if (!isLastPage)
                   Positioned(
                     top: MediaQuery.of(context).padding.top + 8,
                     right: 16,
                     child: TextButton(
                       onPressed: () {
-                        // Langsung navigasi ke halaman login
                         context.goNamed(RouteName.login);
                       },
                       style: TextButton.styleFrom(

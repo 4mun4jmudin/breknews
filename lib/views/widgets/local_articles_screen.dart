@@ -61,7 +61,6 @@ class LocalArticlesScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            // Gunakan Consumer untuk mendengarkan perubahan pada LocalArticleController
             child: Consumer<LocalArticleController>(
               builder: (context, localArticleController, child) {
                 final List<Article> articles =
@@ -103,10 +102,8 @@ class LocalArticlesScreen extends StatelessWidget {
                       final article = articles[index];
                       return NewsCardWidget(
                         article: article,
-                        isBookmarked:
-                            false, // Untuk artikel lokal, bookmark mungkin tidak relevan
+                        isBookmarked: false,
                         onBookmarkTap: () {
-                          // Fungsi ini sekarang akan menghapus artikel lokal
                           showDialog(
                             context: context,
                             builder: (BuildContext ctx) {

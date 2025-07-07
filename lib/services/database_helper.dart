@@ -5,7 +5,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
-import '../data/models/article_model.dart'; // Pastikan path ini benar
+import '../data/models/article_model.dart';
 
 class DatabaseHelper {
   static const _databaseName = "MyNewsApp.db";

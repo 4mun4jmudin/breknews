@@ -39,12 +39,6 @@ android {
     }
 }
 
-dependencies {
-
-    implementation("androidx.window:window:1.3.0")
-    implementation("androidx.window:window-java:1.3.0")
-}
-
 flutter {
     source = "../.."
 }

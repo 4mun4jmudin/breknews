@@ -47,12 +47,10 @@ class EditProfileController with ChangeNotifier {
       usernameController.text = prefs.getString('currentUsername') ?? '';
       emailController.text = prefs.getString('currentUserEmail') ?? '';
 
-      // Data ini kita simpan dengan key 'local' untuk membedakannya dari data asli API
       phoneController.text = prefs.getString('localPhoneNumber') ?? '';
       addressController.text = prefs.getString('localAddress') ?? '';
       cityController.text = prefs.getString('localCity') ?? '';
 
-      // Prioritaskan gambar lokal yang sudah disimpan, baru gambar dari API
       _initialProfileImagePath =
           prefs.getString('localProfilePicPath') ??
           prefs.getString('currentUserAvatarUrl');
@@ -73,8 +71,7 @@ class EditProfileController with ChangeNotifier {
       );
       if (pickedFile != null) {
         _selectedImageFile = File(pickedFile.path);
-        _imageWasRemoved =
-            false; // Jika user memilih gambar baru, batalkan status hapus
+        _imageWasRemoved = false;
         notifyListeners();
       }
     } catch (e) {
@@ -85,7 +82,7 @@ class EditProfileController with ChangeNotifier {
 
   void removeProfileImage() {
     _selectedImageFile = null;
-    _imageWasRemoved = true; // Tandai bahwa gambar sengaja dihapus
+    _imageWasRemoved = true;
     notifyListeners();
   }
 
@@ -96,23 +93,17 @@ class EditProfileController with ChangeNotifier {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      // Simpan data teks ke SharedPreferences
       await prefs.setString('currentUsername', usernameController.text);
       await prefs.setString('localPhoneNumber', phoneController.text);
       await prefs.setString('localAddress', addressController.text);
       await prefs.setString('localCity', cityController.text);
 
-      // Logika penyimpanan gambar
       if (_selectedImageFile != null) {
-        // Jika ada gambar baru yang dipilih, simpan path-nya
         await prefs.setString('localProfilePicPath', _selectedImageFile!.path);
       } else if (_imageWasRemoved) {
-        // Jika gambar dihapus, hapus semua key gambar
         await prefs.remove('localProfilePicPath');
         await prefs.remove('currentUserAvatarUrl');
       }
-
-      // Jika tidak ada perubahan gambar, key yang lama tidak diubah
 
       return {'success': true, 'message': 'Profil berhasil diperbarui!'};
     } catch (e) {

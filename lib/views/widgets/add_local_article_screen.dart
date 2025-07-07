@@ -25,7 +25,7 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _tagsController = TextEditingController();
   String? _selectedCategory;
-  File? _selectedImageFile; // <-- Diaktifkan kembali
+  File? _selectedImageFile;
 
   final List<String> _categories = [
     'Technology',
