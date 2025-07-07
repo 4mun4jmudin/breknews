@@ -3,6 +3,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:breaknews/views/widgets/bookmark_screen.dart';
+import 'package:breaknews/views/widgets/edit_article_screen.dart';
 import 'package:breaknews/views/widgets/edit_profile_screen.dart';
 import 'package:breaknews/views/widgets/forgot_password_screen.dart';
 import 'package:breaknews/views/widgets/reset_password_screen.dart';
@@ -186,6 +187,22 @@ final GoRouter _router = GoRouter(
           appBar: AppBar(title: const Text("Error")),
           body: const Center(
             child: Text("Email tidak valid untuk reset password."),
+          ),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/edit-article',
+      name: 'editArticle', // Beri nama rute
+      builder: (BuildContext context, GoRouterState state) {
+        final Article? article = state.extra as Article?;
+        if (article != null) {
+          return EditArticleScreen(articleToEdit: article);
+        }
+        return Scaffold(
+          appBar: AppBar(title: const Text('Error')),
+          body: const Center(
+            child: Text('Artikel tidak ditemukan untuk diedit.'),
           ),
         );
       },

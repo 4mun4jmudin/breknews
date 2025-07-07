@@ -1,3 +1,5 @@
+// lib/services/news_api_service.dart
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -6,6 +8,7 @@ import '../data/models/article_model.dart';
 import '../config/api_config.dart';
 
 class NewsApiService {
+  // ... (Fungsi _getHeaders, fetchTopHeadlines, searchNews, dan addArticle tidak berubah)
   Future<Map<String, String>> _getHeaders() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
@@ -65,7 +68,6 @@ class NewsApiService {
     }
   }
 
-  // --- FUNGSI INI KITA PASTIKAN SUDAH BENAR ---
   Future<List<Article>> searchNews(String query) async {
     if (query.isEmpty) return [];
 
@@ -79,8 +81,6 @@ class NewsApiService {
 
       if (response.statusCode == 200) {
         final dynamic jsonData = jsonDecode(response.body);
-
-        // Gunakan logika parsing yang sama dengan fetchTopHeadlines
         if (jsonData['body'] != null &&
             jsonData['body']['success'] == true &&
             jsonData['body']['data'] is List) {
@@ -92,23 +92,19 @@ class NewsApiService {
           debugPrint(
             "Respons pencarian tidak valid atau success:false. Body: ${response.body}",
           );
-          // Jika format tidak valid, kembalikan daftar kosong
           return [];
         }
       } else {
-        // Jika status code bukan 200 (misal: 500), lempar error
         throw Exception(
           'Pencarian gagal: Server merespons dengan status code ${response.statusCode}',
         );
       }
     } catch (e) {
       debugPrint('Error di searchNews: $e');
-      // Lempar lagi error-nya agar bisa ditangkap oleh controller
       throw Exception('Gagal melakukan pencarian: $e');
     }
   }
 
-  // Sisa file tidak perlu diubah...
   Future<Map<String, dynamic>> addArticle({
     required String title,
     required String content,
@@ -141,6 +137,84 @@ class NewsApiService {
         };
       } else {
         return {'success': false, 'message': responseBody['body']?['message']};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Terjadi kesalahan koneksi: $e'};
+    }
+  }
+
+  // --- [DIPERBAIKI] FUNGSI UNTUK MENGUPDATE ARTIKEL ---
+  Future<Map<String, dynamic>> updateArticle({
+    required String id, // Menggunakan ID
+    required String title,
+    required String content,
+    required String category,
+    required List<String> tags,
+    String? imageUrl,
+  }) async {
+    try {
+      final headers = await _getHeaders();
+      var uri = Uri.parse(
+        '${ApiConfig.baseUrl}api/author/news/$id',
+      ); // Endpoint diubah ke /id
+
+      final body = json.encode({
+        "title": title,
+        "summary": content.length > 150 ? content.substring(0, 150) : content,
+        "content": content,
+        "featuredImageUrl": imageUrl,
+        "category": category,
+        "tags": tags,
+        "isPublished": true, // Field ditambahkan sesuai dokumentasi
+      });
+
+      var response = await http.put(uri, headers: headers, body: body);
+      var responseBody = json.decode(response.body);
+
+      if (response.statusCode == 200 &&
+          responseBody['body']?['success'] == true) {
+        return {'success': true, 'message': 'Artikel berhasil diperbarui!'};
+      } else {
+        return {
+          'success': false,
+          'message':
+              responseBody['body']?['message'] ?? 'Gagal memperbarui artikel.',
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Terjadi kesalahan koneksi: $e'};
+    }
+  }
+
+  // --- [DIPERBAIKI] FUNGSI UNTUK MENGHAPUS ARTIKEL ---
+  Future<Map<String, dynamic>> deleteArticle(String id) async {
+    // Menggunakan ID
+    try {
+      final headers = await _getHeaders();
+      var uri = Uri.parse(
+        '${ApiConfig.baseUrl}api/author/news/$id',
+      ); // Endpoint diubah ke /id
+
+      var response = await http.delete(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        var responseBody = json.decode(response.body);
+        if (responseBody['body']?['success'] == true) {
+          return {'success': true, 'message': 'Artikel berhasil dihapus!'};
+        } else {
+          return {
+            'success': false,
+            'message':
+                responseBody['body']?['message'] ??
+                'Gagal menghapus artikel dari server.',
+          };
+        }
+      } else {
+        return {
+          'success': false,
+          'message':
+              'Gagal menghapus: Server merespons dengan status ${response.statusCode}',
+        };
       }
     } catch (e) {
       return {'success': false, 'message': 'Terjadi kesalahan koneksi: $e'};

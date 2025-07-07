@@ -9,7 +9,7 @@ class RouteName {
   static const String bookmark = 'bookmark';
   static const String addLocalArticle = 'addLocalArticle';
   static const String localArticles = 'localArticles';
-
+  static const String editArticle = 'editArticle';
   static const String profile = 'profile';
   static const String editProfile = 'editProfile';
   static const String settings = 'settings';

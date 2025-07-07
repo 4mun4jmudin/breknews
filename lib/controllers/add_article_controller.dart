@@ -72,4 +72,69 @@ class AddArticleController with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // --- [PERBAIKAN] Metode updateArticle yang sebelumnya terlewat, sekarang ditambahkan ---
+  Future<Map<String, dynamic>> updateArticle({
+    required String id,
+    required String title,
+    required String content,
+    required String category,
+    required String tagsString,
+    File? imageFile,
+    String? initialImageUrl, // URL gambar yang sudah ada
+  }) async {
+    _isSaving = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      String? finalImageUrl = initialImageUrl;
+
+      // Jika ada file gambar baru yang dipilih, unggah
+      if (imageFile != null) {
+        _statusMessage = "Mengunggah gambar baru...";
+        notifyListeners();
+        finalImageUrl = await _imageUploadService.uploadImage(imageFile);
+        if (finalImageUrl == null) {
+          throw Exception("Gagal mengunggah gambar baru ke server.");
+        }
+      }
+
+      _statusMessage = "Memperbarui artikel...";
+      notifyListeners();
+
+      final List<String> tagsList = tagsString
+          .split(',')
+          .map((tag) => tag.trim())
+          .where((tag) => tag.isNotEmpty)
+          .toList();
+
+      // Panggil service untuk update
+      final result = await _newsApiService.updateArticle(
+        id: id,
+        title: title,
+        content: content,
+        category: category,
+        tags: tagsList,
+        imageUrl: finalImageUrl,
+      );
+
+      if (!result['success']) {
+        _errorMessage = result['message'];
+      } else {
+        // Kirim balik URL gambar yang baru (jika ada) agar UI bisa update
+        result['newImageUrl'] = finalImageUrl;
+      }
+
+      _statusMessage = "";
+      return result;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _statusMessage = "";
+      return {'success': false, 'message': _errorMessage!};
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+  }
 }

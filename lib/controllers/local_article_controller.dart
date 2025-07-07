@@ -1,165 +1,81 @@
 // lib/controllers/local_article_controller.dart
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path_provider/path_provider.dart'; // Import path_provider
-import 'package:path/path.dart' as p; // Import path package with an alias
 import '../data/models/article_model.dart';
-
-const String _localArticlesKey = 'local_articles_data';
+import '../services/news_api_service.dart';
 
 class LocalArticleController with ChangeNotifier {
-  List<Article> _localArticlesList = [];
-  bool _isLoadingInitialData = true;
-  List<Article> get localArticles => List.unmodifiable(_localArticlesList);
-  bool get isLoadingInitialData => _isLoadingInitialData;
+  final NewsApiService _newsApiService = NewsApiService();
+
+  List<Article> _myArticles = [];
+  List<Article> get myArticles => List.unmodifiable(_myArticles);
+
+  bool _isLoading = true;
+  bool get isLoading => _isLoading;
+
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
 
   LocalArticleController() {
-    _loadArticlesFromPrefs();
+    fetchMyArticles();
   }
 
-  Future<String?> _copyImageToAppDirectory(File originalImageFile) async {
-    try {
-      final Directory appDocDir = await getApplicationDocumentsDirectory();
-      final String fileName = p.basename(originalImageFile.path);
-      final String newFilePath = p.join(
-        appDocDir.path,
-        'local_article_images',
-        fileName,
-      );
+  Future<void> fetchMyArticles() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
-      final Directory imageDir = Directory(
-        p.join(appDocDir.path, 'local_article_images'),
-      );
-      if (!await imageDir.exists()) {
-        await imageDir.create(recursive: true);
+    try {
+      // 1. Dapatkan username pengguna yang sedang login dari SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final String? currentUsername = prefs.getString('currentUsername');
+
+      if (currentUsername == null || currentUsername.isEmpty) {
+        throw Exception(
+          "Sesi pengguna tidak ditemukan. Silakan login kembali.",
+        );
       }
 
-      final File newImageFile = await originalImageFile.copy(newFilePath);
-      debugPrint('Image copied to: ${newImageFile.path}');
-      return newImageFile.path;
-    } catch (e) {
-      debugPrint('Error copying image: $e');
-      return null;
-    }
-  }
+      // 2. Ambil semua artikel dari API
+      final List<Article> allArticles = await _newsApiService.fetchTopHeadlines(
+        category: null,
+      );
 
-  Future<void> _saveArticlesToPrefs() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      Map<String, dynamic> dataToSave = {
-        "status": "ok",
-        "totalResults": _localArticlesList.length,
-        "articles": _localArticlesList
-            .map((article) => article.toJson())
-            .toList(),
-      };
-      String jsonString = jsonEncode(dataToSave);
-      await prefs.setString(_localArticlesKey, jsonString);
-      debugPrint('Local articles saved to SharedPreferences.');
+      // 3. Saring artikel berdasarkan nama author
+      _myArticles = allArticles.where((article) {
+        return article.author?.trim().toLowerCase() ==
+            currentUsername.trim().toLowerCase();
+      }).toList();
     } catch (e) {
-      debugPrint('Error saving local articles to SharedPreferences: $e');
-    }
-  }
-
-  Future<void> _loadArticlesFromPrefs() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      String? jsonString = prefs.getString(_localArticlesKey);
-      if (jsonString != null) {
-        Map<String, dynamic> storedData = jsonDecode(jsonString);
-        if (storedData['status'] == 'ok' && storedData['articles'] != null) {
-          List<dynamic> articlesJson = storedData['articles'];
-          _localArticlesList = articlesJson
-              .map((json) => Article.fromJson(json as Map<String, dynamic>))
-              .toList();
-          debugPrint(
-            'Local articles loaded from SharedPreferences: ${_localArticlesList.length} articles.',
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint('Error loading local articles from SharedPreferences: $e');
-      _localArticlesList = [];
+      _errorMessage = "Gagal memuat artikel Anda: ${e.toString()}";
+      _myArticles = [];
     } finally {
-      _isLoadingInitialData = false;
+      _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> addLocalArticle({
-    required String title,
-    required String content,
-    String? authorInput,
-    File? imageFile,
-  }) async {
-    String? finalImagePath;
-    if (imageFile != null) {
-      finalImagePath = await _copyImageToAppDirectory(imageFile);
+  Future<Map<String, dynamic>> removeArticle(Article articleToRemove) async {
+    if (articleToRemove.sourceId == null || articleToRemove.sourceId!.isEmpty) {
+      return {'success': false, 'message': 'Artikel tidak memiliki ID.'};
     }
 
-    final newArticle = Article(
-      title: title,
-      content: content,
-      author: authorInput,
-      sourceId: "local_source",
-      sourceName: authorInput ?? "Local Entry",
-      publishedAt: DateTime.now(),
-      urlToImage: finalImagePath,
-      description: content.length > 150
-          ? '${content.substring(0, 147)}...'
-          : content,
-      url: null,
+    final result = await _newsApiService.deleteArticle(
+      articleToRemove.sourceId!,
     );
 
-    _localArticlesList.insert(0, newArticle);
-    await _saveArticlesToPrefs();
-    notifyListeners();
-    debugPrint('Local article added and saved: ${newArticle.title}');
-    debugPrint('Image path saved: ${newArticle.urlToImage}');
-    debugPrint('Total local articles: ${_localArticlesList.length}');
-  }
-
-  Future<void> removeLocalArticle(Article articleToRemove) async {
-    if (articleToRemove.urlToImage != null &&
-        articleToRemove.urlToImage!.isNotEmpty) {
-      try {
-        final imageFile = File(articleToRemove.urlToImage!);
-        if (await imageFile.exists()) {
-          await imageFile.delete();
-          debugPrint('Local image file deleted: ${articleToRemove.urlToImage}');
-        }
-      } catch (e) {
-        debugPrint('Error deleting local image file: $e');
-      }
-    }
-
-    int initialLength = _localArticlesList.length;
-    _localArticlesList.removeWhere((article) {
-      bool titleMatch = article.title == articleToRemove.title;
-      bool timestampMatch = article.publishedAt == articleToRemove.publishedAt;
-      bool imageMatch = article.urlToImage == articleToRemove.urlToImage;
-      return titleMatch && timestampMatch && imageMatch;
-    });
-
-    if (_localArticlesList.length < initialLength) {
-      await _saveArticlesToPrefs();
-      notifyListeners();
-      debugPrint('Local article removed and saved: ${articleToRemove.title}');
-    } else {
-      debugPrint(
-        'Could not find local article to remove: ${articleToRemove.title}',
+    if (result['success'] == true) {
+      // Hapus dari daftar di UI jika berhasil
+      _myArticles.removeWhere(
+        (article) => article.sourceId == articleToRemove.sourceId,
       );
+      notifyListeners();
     }
+    return result;
   }
 
-  Future<void> addNewlyCreatedArticle(Article article) async {
-    _localArticlesList.insert(0, article);
-    await _saveArticlesToPrefs();
-    notifyListeners();
-    debugPrint(
-      'Artikel baru dari server berhasil disimpan secara lokal: ${article.title}',
-    );
+  // Fungsi untuk me-refresh data
+  Future<void> refresh() async {
+    await fetchMyArticles();
   }
 }

@@ -1,7 +1,7 @@
 // lib/views/widgets/news_card_widget.dart
 // ignore_for_file: deprecated_member_use
 
-import 'dart:io'; // Import untuk File
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
@@ -13,14 +13,18 @@ class NewsCardWidget extends StatelessWidget {
   final Article article;
   final bool isBookmarked;
   final VoidCallback onBookmarkTap;
+  final List<Widget>
+  actions; // --- [BARU] Properti untuk menampung tombol aksi ---
 
   const NewsCardWidget({
     super.key,
     required this.article,
     required this.isBookmarked,
     required this.onBookmarkTap,
+    this.actions = const [], // Defaultnya adalah list kosong
   });
 
+  // ... (fungsi _buildErrorImage dan _buildLoadingImage tidak berubah)
   Widget _buildErrorImage(ThemeData theme) {
     return Container(
       width: 100.0,
@@ -77,8 +81,6 @@ class NewsCardWidget extends StatelessWidget {
         : (article.author?.isNotEmpty ?? false
               ? article.author!
               : "Unknown Source");
-
-    bool isLocalArticle = article.url == null || article.url!.isEmpty;
 
     Widget imageWidget;
     if (article.urlToImage != null && article.urlToImage!.isNotEmpty) {
@@ -183,24 +185,24 @@ class NewsCardWidget extends StatelessWidget {
               ),
             ),
             helper.hsTiny,
-            InkWell(
-              onTap: onBookmarkTap,
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: Icon(
-                  isLocalArticle
-                      ? Icons.delete_outline_rounded
-                      : (isBookmarked
-                            ? Icons.bookmark_rounded
-                            : Icons.bookmark_border_rounded),
-                  color: isLocalArticle
-                      ? theme.colorScheme.error.withOpacity(0.8)
-                      : (isBookmarked ? colorScheme.primary : theme.hintColor),
-                  size: 24.0,
+            // --- [MODIFIKASI] Menampilkan daftar aksi atau tombol bookmark ---
+            if (actions.isNotEmpty)
+              Row(mainAxisSize: MainAxisSize.min, children: actions)
+            else
+              InkWell(
+                onTap: onBookmarkTap,
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Icon(
+                    isBookmarked
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
+                    color: isBookmarked ? colorScheme.primary : theme.hintColor,
+                    size: 24.0,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

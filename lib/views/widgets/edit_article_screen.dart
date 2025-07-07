@@ -1,4 +1,4 @@
-// lib/views/widgets/add_local_article_screen.dart
+// lib/views/widgets/edit_article_screen.dart
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'dart:io';
@@ -7,25 +7,27 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../utils/helper.dart' as helper;
-import '../../routes/route_name.dart';
-import '../../controllers/add_article_controller.dart';
 import '../../data/models/article_model.dart';
+import '../utils/helper.dart' as helper;
+import '../../controllers/edit_article_controller.dart';
 
-class AddLocalArticleScreen extends StatefulWidget {
-  const AddLocalArticleScreen({super.key});
+class EditArticleScreen extends StatefulWidget {
+  final Article articleToEdit;
+
+  const EditArticleScreen({super.key, required this.articleToEdit});
 
   @override
-  State<AddLocalArticleScreen> createState() => _AddLocalArticleScreenState();
+  State<EditArticleScreen> createState() => _EditArticleScreenState();
 }
 
-class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
+class _EditArticleScreenState extends State<EditArticleScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
-  final TextEditingController _tagsController = TextEditingController();
+  late TextEditingController _titleController;
+  late TextEditingController _contentController;
+  late TextEditingController _tagsController;
   String? _selectedCategory;
   File? _selectedImageFile;
+  String? _initialImageUrl;
 
   final List<String> _categories = [
     'Technology',
@@ -35,6 +37,18 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
     'Entertainment',
     'Science',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    final article = widget.articleToEdit;
+    _titleController = TextEditingController(text: article.title);
+    _contentController = TextEditingController(text: article.content ?? '');
+    // Jika Anda menyimpan tags, Anda bisa memuatnya di sini
+    _tagsController = TextEditingController();
+    _selectedCategory = article.category;
+    _initialImageUrl = article.urlToImage;
+  }
 
   @override
   void dispose() {
@@ -89,7 +103,7 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
                   Navigator.of(context).pop();
                 },
               ),
-              if (_selectedImageFile != null)
+              if (_selectedImageFile != null || _initialImageUrl != null)
                 ListTile(
                   leading: const Icon(
                     Icons.delete_outline_rounded,
@@ -102,6 +116,7 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
                   onTap: () {
                     setState(() {
                       _selectedImageFile = null;
+                      _initialImageUrl = null;
                     });
                     Navigator.of(context).pop();
                   },
@@ -113,7 +128,7 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
     );
   }
 
-  Future<void> _saveArticle(AddArticleController controller) async {
+  Future<void> _updateArticle(EditArticleController controller) async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -130,22 +145,36 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
       listen: false,
     );
 
-    Map<String, dynamic> result = await controller.publishArticle(
+    Map<String, dynamic> result = await controller.updateArticle(
+      id: widget.articleToEdit.sourceId!,
       title: _titleController.text.trim(),
       content: _contentController.text.trim(),
       category: _selectedCategory!,
       tagsString: _tagsController.text,
       imageFile: _selectedImageFile,
+      initialImageUrl: _initialImageUrl,
     );
 
     if (result['success'] == true && mounted) {
-      await localArticleController.refresh();
+      // final updatedArticle = Article(
+      //   sourceId: widget.articleToEdit.sourceId,
+      //   slug: widget.articleToEdit.slug,
+      //   title: _titleController.text.trim(),
+      //   content: _contentController.text.trim(),
+      //   category: _selectedCategory!,
+      //   urlToImage: result['newImageUrl'] ?? _initialImageUrl,
+      //   author: widget.articleToEdit.author,
+      //   publishedAt: widget.articleToEdit.publishedAt,
+      //   sourceName: widget.articleToEdit.sourceName,
+      // );
+      // localArticleController.updateArticleInList(updatedArticle);
+
       await _showSuccessDialog();
-      context.goNamed(RouteName.localArticles);
+      context.pop(true);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] ?? 'Terjadi kesalahan.'),
+          content: Text(result['message'] ?? 'Terjadi kesalahan saat update.'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -155,12 +184,18 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AddArticleController(),
-      child: Consumer<AddArticleController>(
+      create: (_) => EditArticleController(),
+      child: Consumer<EditArticleController>(
         builder: (context, controller, child) {
           final ThemeData theme = Theme.of(context);
           return Scaffold(
-            appBar: AppBar(title: const Text("Publikasikan Artikel Baru")),
+            appBar: AppBar(
+              title: const Text("Edit Artikel"),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                onPressed: () => context.pop(),
+              ),
+            ),
             body: AbsorbPointer(
               absorbing: controller.isSaving,
               child: SingleChildScrollView(
@@ -203,10 +238,9 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
                       helper.vsMedium,
                       _buildTextField(
                         controller: _contentController,
-                        labelText: "Add News/Article",
-                        hintText: "Type News/Article Here ...",
+                        labelText: "Article Content",
+                        hintText: "Type your article here...",
                         maxLines: 8,
-                        keyboardType: TextInputType.multiline,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Content cannot be empty.';
@@ -220,7 +254,7 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
                       helper.vsMedium,
                       _buildTextField(
                         controller: _tagsController,
-                        labelText: "Add Tag",
+                        labelText: "Tags",
                         hintText: "Enter tags, separated by commas",
                         validator: (value) {
                           if (value != null &&
@@ -245,7 +279,9 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
                 MediaQuery.of(context).padding.bottom + 16.0,
               ),
               child: ElevatedButton(
-                onPressed: () => _saveArticle(controller),
+                onPressed: controller.isSaving
+                    ? null
+                    : () => _updateArticle(controller),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
                   foregroundColor: theme.colorScheme.onPrimary,
@@ -269,11 +305,11 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
                           Text(
                             controller.statusMessage.isNotEmpty
                                 ? controller.statusMessage
-                                : 'Memublikasikan...',
+                                : 'Menyimpan...',
                           ),
                         ],
                       )
-                    : const Text('Publikasikan Sekarang'),
+                    : const Text('Simpan Perubahan'),
               ),
             ),
           );
@@ -290,6 +326,17 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
         child: Image.file(_selectedImageFile!, fit: BoxFit.cover),
       );
     }
+    if (_initialImageUrl != null && _initialImageUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(11.0),
+        child: Image.network(
+          _initialImageUrl!,
+          fit: BoxFit.cover,
+          errorBuilder: (c, e, s) =>
+              const Icon(Icons.broken_image_outlined, size: 40),
+        ),
+      );
+    }
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -299,7 +346,7 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
           color: theme.hintColor,
         ),
         helper.vsSmall,
-        Text('Tambah Foto Sampul', style: TextStyle(color: theme.hintColor)),
+        Text('Ubah Foto Sampul', style: TextStyle(color: theme.hintColor)),
       ],
     );
   }
@@ -472,7 +519,7 @@ class _AddLocalArticleScreenState extends State<AddLocalArticleScreen> {
               ),
               helper.vsSmall,
               Text(
-                "Artikel Anda Berhasil Dipublikasikan",
+                "Artikel Anda Berhasil Diperbarui",
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Theme.of(
