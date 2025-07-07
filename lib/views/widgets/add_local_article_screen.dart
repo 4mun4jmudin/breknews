@@ -10,7 +10,7 @@ import 'package:go_router/go_router.dart';
 import '../utils/helper.dart' as helper;
 import '../../routes/route_name.dart';
 import '../../controllers/add_article_controller.dart';
-import '../../data/models/article_model.dart';
+// import '../../data/models/article_model.dart';
 
 class AddLocalArticleScreen extends StatefulWidget {
   const AddLocalArticleScreen({super.key});

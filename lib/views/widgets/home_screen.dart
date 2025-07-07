@@ -295,28 +295,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     }
                     return RefreshIndicator(
-                      onRefresh: () async =>
-                          controller.isSearchActive &&
-                              controller.currentSearchQuery != null
-                          ? controller.searchArticles(
-                              controller.currentSearchQuery!,
-                            )
-                          : controller.fetchArticlesByCategory(
-                              controller.selectedCategory,
-                            ),
+                      onRefresh: () => controller
+                          .refreshData(), // Memanggil metode refresh yang benar
                       color: theme.colorScheme.primary,
                       child: ListView.builder(
                         padding: const EdgeInsets.only(bottom: 16.0),
                         itemCount: controller.articles.length,
                         itemBuilder: (context, index) {
                           final article = controller.articles[index];
-                          bool isBookmarked = controller.isArticleBookmarked(
-                            article.url,
-                          );
+
                           return NewsCardWidget(
                             article: article,
-                            isBookmarked: isBookmarked,
+                            isBookmarked: controller.isArticleBookmarked(
+                              article.url,
+                            ),
+                            onCategoryTap: (category) {
+                              controller.onCategorySelected(category);
+                            },
                             onBookmarkTap: () {
+                              final bool isCurrentlyBookmarked = controller
+                                  .isArticleBookmarked(article.url);
                               controller.toggleBookmark(article);
                               ScaffoldMessenger.of(
                                 context,
@@ -324,9 +322,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    isBookmarked
-                                        ? "'${article.title}' dihapus dari bookmark."
-                                        : "'${article.title}' ditambahkan ke bookmark.",
+                                    !isCurrentlyBookmarked
+                                        ? "'${article.title}' ditambahkan ke bookmark."
+                                        : "'${article.title}' dihapus dari bookmark.",
                                   ),
                                   duration: const Duration(seconds: 2),
                                 ),
@@ -441,11 +439,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         onPressed: () {
                           _searchController.clear();
-                          // --- PERUBAHAN DI SINI ---
-                          controller.fetchArticlesByCategory(
-                            // Gunakan kategori default yang baru
+                          // --- PERBAIKAN DI SINI ---
+                          controller.onCategorySelected(
                             controller.categories.first,
-                          );
+                          ); // Panggil metode yang benar
                           _searchFocusNode.unfocus();
                           setState(() {});
                         },
@@ -459,9 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (value.trim().isNotEmpty) {
                   controller.searchArticles(value.trim());
                 } else {
-                  controller.fetchArticlesByCategory(
-                    controller.categories.first,
-                  );
+                  controller.onCategorySelected(controller.categories.first);
                 }
                 _searchFocusNode.unfocus();
               },

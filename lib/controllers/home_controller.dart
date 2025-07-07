@@ -1,7 +1,7 @@
 // lib/controllers/home_controller.dart
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
+// import 'package:shared_preferences/shared_preferences.dart';
 import '../services/news_api_service.dart';
 import '../data/models/article_model.dart';
 import '../services/database_helper.dart';
@@ -10,27 +10,24 @@ class HomeController with ChangeNotifier {
   final NewsApiService _newsApiService = NewsApiService();
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
+  // Daftar untuk menyimpan SEMUA artikel yang diambil dari API
+  List<Article> _masterArticleList = [];
+
+  // Daftar yang akan ditampilkan di UI (hasil filter)
   List<Article> _articles = [];
   List<Article> get articles => _articles;
 
-  bool _isLoading = false;
+  bool _isLoading = true;
   bool get isLoading => _isLoading;
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
   Set<String> _bookmarkedArticleUrls = {};
-  String? _currentUsername; // --- [BARU] Untuk menyimpan nama pengguna ---
 
-  final List<String> categories = [
-    "All News",
-    "Business",
-    "Technology",
-    "Sports",
-    "Entertainment",
-    "Health",
-    "Science",
-  ];
+  List<String> _categories = ["All News"];
+  List<String> get categories => _categories;
+
   String _selectedCategory = "All News";
   String get selectedCategory => _selectedCategory;
 
@@ -44,32 +41,89 @@ class HomeController with ChangeNotifier {
     _initialize();
   }
 
-  // --- [BARU] Fungsi inisialisasi ---
+  /// #1: Inisialisasi: Mengambil semua data awal yang diperlukan.
   Future<void> _initialize() async {
-    await _getCurrentUser(); // Dapatkan data pengguna dulu
-    await fetchArticlesByCategory(_selectedCategory); // Baru fetch berita
-  }
+    _isLoading = true;
+    notifyListeners();
 
-  void _setLoading(bool loading) {
-    _isLoading = loading;
+    // Jalankan pengambilan data pendukung secara bersamaan
+    await Future.wait([_loadBookmarkedStatus(), _fetchCategoriesFromApi()]);
+
+    // Ambil semua berita dari API dan simpan ke daftar utama
+    await _fetchAllArticles();
+
+    _isLoading = false;
     notifyListeners();
   }
 
-  void _setError(String? message) {
-    _errorMessage = message;
-    notifyListeners();
-  }
-
-  // --- [BARU] Fungsi untuk mengambil username dari SharedPreferences ---
-  Future<void> _getCurrentUser() async {
+  /// Mengambil semua artikel dari API dan menyimpannya di _masterArticleList.
+  Future<void> _fetchAllArticles() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      _currentUsername = prefs.getString('currentUsername');
+      _masterArticleList = await _newsApiService.fetchTopHeadlines();
+      // Saat pertama kali dimuat, daftar yang ditampilkan adalah semua berita.
+      _articles = List.from(_masterArticleList);
     } catch (e) {
-      debugPrint("HomeController: Gagal mendapatkan username: $e");
+      _errorMessage = e.toString();
+      _articles = [];
+      _masterArticleList = [];
     }
   }
 
+  /// #2: Fungsi filter utama yang bekerja di sisi klien (client-side).
+  void onCategorySelected(String category) {
+    _selectedCategory = category;
+    _isSearchActive = false;
+    _currentSearchQuery = null;
+
+    // Jika "All News" dipilih, tampilkan semua berita dari daftar master.
+    if (category.toLowerCase() == "all news") {
+      _articles = List.from(_masterArticleList);
+    } else {
+      // Jika kategori lain dipilih, saring daftar master berdasarkan kategori.
+      _articles = _masterArticleList.where((article) {
+        return article.category?.toLowerCase() == category.toLowerCase();
+      }).toList();
+    }
+
+    // Perbarui UI untuk menampilkan hasil filter.
+    notifyListeners();
+  }
+
+  /// #3: Mengambil daftar kategori unik dari artikel di API.
+  Future<void> _fetchCategoriesFromApi() async {
+    try {
+      // Ambil contoh artikel untuk diekstrak kategorinya
+      final sampleArticles = await _newsApiService.fetchTopHeadlines();
+      if (sampleArticles.isNotEmpty) {
+        final categorySet = <String>{};
+        for (var article in sampleArticles) {
+          if (article.category != null && article.category!.isNotEmpty) {
+            categorySet.add(article.category!);
+          }
+        }
+        _categories = ["All News", ...categorySet.toList()..sort()];
+      }
+    } catch (e) {
+      debugPrint("Gagal mengambil kategori dari API: $e");
+      // Jika gagal, gunakan daftar statis sebagai cadangan.
+      _categories = [
+        "All News",
+        "Business",
+        "Technology",
+        "Sports",
+        "Entertainment",
+        "Health",
+        "Science",
+      ];
+    }
+  }
+
+  /// Fungsi untuk me-refresh semua data dari API.
+  Future<void> refreshData() async {
+    await _initialize();
+  }
+
+  /// Memuat status bookmark dari database lokal.
   Future<void> _loadBookmarkedStatus() async {
     try {
       final bookmarks = await _dbHelper.getAllBookmarks();
@@ -78,92 +132,47 @@ class HomeController with ChangeNotifier {
           .where((url) => url.isNotEmpty)
           .toSet();
     } catch (e) {
-      debugPrint("HomeController: Error loading bookmark statuses: $e");
+      debugPrint("Error memuat status bookmark: $e");
     }
   }
 
-  Future<void> fetchArticlesByCategory(String category) async {
-    _selectedCategory = category;
-    _isSearchActive = false;
-    _currentSearchQuery = null;
-    _setLoading(true);
-    _setError(null);
-    notifyListeners();
-
-    try {
-      String? apiCategory = category.toLowerCase() == "all news"
-          ? null
-          : category;
-      _articles = await _newsApiService.fetchTopHeadlines(
-        category: apiCategory,
-      );
-    } catch (e) {
-      _setError(e.toString());
-      _articles = [];
-    } finally {
-      await _loadBookmarkedStatus();
-      _setLoading(false);
-    }
-  }
-
-  // Fungsi searchArticles tidak berubah
+  /// Melakukan pencarian artikel.
   void searchArticles(String query) {
-    // ... implementasi pencarian
-  }
-
-  void onCategorySelected(String category) {
-    if (_selectedCategory != category || _articles.isEmpty || _isSearchActive) {
-      fetchArticlesByCategory(category);
+    if (query.trim().isEmpty) {
+      // Jika query kosong, kembali tampilkan sesuai kategori yang terakhir dipilih
+      onCategorySelected(_selectedCategory);
+      return;
     }
+
+    _isSearchActive = true;
+    _currentSearchQuery = query;
+
+    // Lakukan pencarian pada daftar master, bukan memanggil API
+    _articles = _masterArticleList.where((article) {
+      return article.title.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    notifyListeners();
   }
 
+  /// Mengecek apakah sebuah artikel sudah di-bookmark.
   bool isArticleBookmarked(String? articleUrl) {
     if (articleUrl == null || articleUrl.isEmpty) return false;
     return _bookmarkedArticleUrls.contains(articleUrl);
   }
 
+  /// Menambah atau menghapus artikel dari bookmark.
   Future<void> toggleBookmark(Article article) async {
     if (article.url == null || article.url!.isEmpty) return;
-    final bool currentlyBookmarked = isArticleBookmarked(article.url);
-    if (currentlyBookmarked) {
-      _bookmarkedArticleUrls.remove(article.url!);
+
+    final isCurrentlyBookmarked = isArticleBookmarked(article.url);
+    if (isCurrentlyBookmarked) {
+      _bookmarkedArticleUrls.remove(article.url);
       await _dbHelper.removeBookmark(article.url!);
     } else {
       _bookmarkedArticleUrls.add(article.url!);
       await _dbHelper.addBookmark(article);
     }
     notifyListeners();
-  }
-
-  // --- [BARU] Fungsi untuk mengecek kepemilikan artikel ---
-  bool isArticleOwned(Article article) {
-    // Anggap artikel dimiliki jika nama author-nya sama dengan username yang login.
-    // Pastikan perbandingan tidak case-sensitive dan menangani nilai null.
-    if (_currentUsername == null || article.author == null) {
-      return false;
-    }
-    return article.author!.trim().toLowerCase() ==
-        _currentUsername!.trim().toLowerCase();
-  }
-
-  // --- [BARU] Fungsi untuk menghapus artikel dari API dan UI ---
-  Future<Map<String, dynamic>> deleteArticle(Article article) async {
-    if (article.sourceId == null) {
-      return {
-        'success': false,
-        'message': 'Artikel tidak memiliki ID untuk dihapus.',
-      };
-    }
-
-    // Panggil API untuk menghapus
-    final result = await _newsApiService.deleteArticle(article.sourceId!);
-
-    // Jika berhasil, hapus dari daftar di UI
-    if (result['success'] == true) {
-      _articles.removeWhere((a) => a.sourceId == article.sourceId);
-      notifyListeners();
-    }
-
-    return result;
   }
 }

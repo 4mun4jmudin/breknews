@@ -13,18 +13,18 @@ class NewsCardWidget extends StatelessWidget {
   final Article article;
   final bool isBookmarked;
   final VoidCallback onBookmarkTap;
-  final List<Widget>
-  actions; // --- [BARU] Properti untuk menampung tombol aksi ---
+  final List<Widget> actions;
+  final Function(String category)? onCategoryTap;
 
   const NewsCardWidget({
     super.key,
     required this.article,
     required this.isBookmarked,
     required this.onBookmarkTap,
-    this.actions = const [], // Defaultnya adalah list kosong
+    this.actions = const [],
+    this.onCategoryTap,
   });
 
-  // ... (fungsi _buildErrorImage dan _buildLoadingImage tidak berubah)
   Widget _buildErrorImage(ThemeData theme) {
     return Container(
       width: 100.0,
@@ -136,7 +136,10 @@ class NewsCardWidget extends StatelessWidget {
           children: <Widget>[
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: imageWidget,
+              child: Hero(
+                tag: article.url ?? UniqueKey().toString(),
+                child: imageWidget,
+              ),
             ),
             helper.hsMedium,
             Expanded(
@@ -144,48 +147,81 @@ class NewsCardWidget extends StatelessWidget {
                 height: 100.0,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          article.title,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: textTheme.bodyLarge?.color,
-                            height: 1.2,
+                    // --- PERUBAHAN DI SINI ---
+                    // Menambahkan widget untuk menampilkan kategori
+                    if (article.category != null &&
+                        article.category!.isNotEmpty)
+                      // Bungkus Container dengan InkWell agar bisa diklik
+                      InkWell(
+                        onTap: () {
+                          // Panggil fungsi callback jika ada dan kategori tidak kosong
+                          if (onCategoryTap != null) {
+                            onCategoryTap!(article.category!);
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(5.0),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 5.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 3.0,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        helper.vsSuperTiny,
-                        Text(
-                          sourceDisplay,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: textTheme.bodyMedium?.color?.withOpacity(
-                              0.7,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          child: Text(
+                            article.category!,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.bold,
                             ),
+                          ),
+                        ),
+                      ),
+                    Text(
+                      article.title,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: textTheme.bodyLarge?.color,
+                        height: 1.2,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(), // Memberi ruang antara judul dan bagian bawah
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            sourceDisplay,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: textTheme.bodyMedium?.color?.withOpacity(
+                                0.7,
+                              ),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          formattedDate,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: theme.hintColor.withOpacity(0.9),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
-                    Text(
-                      formattedDate,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: theme.hintColor.withOpacity(0.9),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ],
                 ),
               ),
             ),
             helper.hsTiny,
-            // --- [MODIFIKASI] Menampilkan daftar aksi atau tombol bookmark ---
             if (actions.isNotEmpty)
               Row(mainAxisSize: MainAxisSize.min, children: actions)
             else

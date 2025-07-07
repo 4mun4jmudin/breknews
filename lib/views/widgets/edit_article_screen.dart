@@ -2,7 +2,7 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'dart:io';
-import 'package:breaknews/controllers/local_article_controller.dart';
+// import 'package:breaknews/controllers/local_article_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -140,10 +140,10 @@ class _EditArticleScreenState extends State<EditArticleScreen> {
       return;
     }
 
-    final localArticleController = Provider.of<LocalArticleController>(
-      context,
-      listen: false,
-    );
+    // final localArticleController = Provider.of<LocalArticleController>(
+    //   context,
+    //   listen: false,
+    // );
 
     Map<String, dynamic> result = await controller.updateArticle(
       id: widget.articleToEdit.sourceId!,
