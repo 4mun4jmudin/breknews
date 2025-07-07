@@ -9,6 +9,7 @@ import '../../data/models/article_model.dart';
 import 'news_card_widget.dart';
 import '../utils/helper.dart' as helper;
 import '../../routes/route_name.dart';
+import '../../controllers/theme_controller.dart';
 
 class _FeaturedNewsCardWidget extends StatelessWidget {
   final Article article;
@@ -345,6 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHeader(BuildContext context, ThemeData theme) {
+    final themeController = Provider.of<ThemeController>(context);
     return Padding(
       padding: const EdgeInsets.only(
         left: 16.0,
@@ -373,6 +375,21 @@ class _HomeScreenState extends State<HomeScreen> {
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
+          ),
+          const Spacer(),
+          IconButton(
+            splashRadius: 20,
+            icon: Icon(
+              // Ganti ikon berdasarkan tema saat ini
+              themeController.themeMode == ThemeMode.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+              color: theme.colorScheme.primary,
+            ),
+            onPressed: () {
+              // Panggil fungsi toggle dari controller
+              themeController.toggleTheme();
+            },
           ),
         ],
       ),

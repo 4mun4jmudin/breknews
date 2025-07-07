@@ -12,6 +12,13 @@ class ThemeController with ChangeNotifier {
     _loadThemePreference();
   }
 
+  void toggleTheme() {
+    final newTheme = _themeMode == ThemeMode.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
+    setTheme(newTheme);
+  }
+
   Future<void> _loadThemePreference() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();

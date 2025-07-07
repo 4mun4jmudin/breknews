@@ -10,10 +10,8 @@ class HomeController with ChangeNotifier {
   final NewsApiService _newsApiService = NewsApiService();
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-  // Daftar untuk menyimpan SEMUA artikel yang diambil dari API
   List<Article> _masterArticleList = [];
 
-  // Daftar yang akan ditampilkan di UI (hasil filter)
   List<Article> _articles = [];
   List<Article> get articles => _articles;
 
@@ -41,7 +39,6 @@ class HomeController with ChangeNotifier {
     _initialize();
   }
 
-  /// #1: Inisialisasi: Mengambil semua data awal yang diperlukan.
   Future<void> _initialize() async {
     _isLoading = true;
     notifyListeners();
