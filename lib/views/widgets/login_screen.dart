@@ -9,6 +9,30 @@ import '../../routes/route_name.dart';
 import '../utils/form_validaror.dart';
 import '../../services/auth_api_service.dart';
 
+// 1. Clipper diubah untuk kurva tunggal yang lebih halus dan modern
+class TopImageClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(0, size.height - 80); // Mulai dari bawah
+    // Membuat satu kurva melengkung yang elegan
+    path.quadraticBezierTo(
+      size.width / 2, // Titik kontrol di tengah
+      size.height, // Puncak lengkungan di bawah
+      size.width, // Titik akhir di kanan bawah
+      size.height - 80,
+    );
+    path.lineTo(size.width, 0); // Garis ke kanan atas
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return false;
+  }
+}
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -68,9 +92,11 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // 2. Input field diperbarui dengan prefixIcon
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
+    required IconData icon,
     required String? Function(String?) validator,
     bool isPassword = false,
   }) {
@@ -78,14 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            // ignore: deprecated_member_use
-            color: theme.colorScheme.onBackground.withOpacity(0.8),
-          ),
-        ),
+        Text(label, style: theme.textTheme.titleMedium),
         helper.vsTiny,
         TextFormField(
           controller: controller,
@@ -93,20 +112,8 @@ class _LoginScreenState extends State<LoginScreen> {
           obscureText: isPassword && !_isPasswordVisible,
           style: theme.textTheme.bodyLarge,
           decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: theme.hintColor, size: 22),
             hintText: 'Enter your ${label.toLowerCase()}',
-            hintStyle: TextStyle(color: theme.hintColor.withOpacity(0.6)),
-            filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(
-              0.3,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 16.0,
-              horizontal: 16.0,
-            ),
             suffixIcon: isPassword
                 ? IconButton(
                     icon: Icon(
@@ -151,10 +158,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: screenHeight * 0.35,
                 width: double.infinity,
                 child: Image.asset(
-                  'assets/images/iconlogin1.png',
+                  'assets/images/iconlogin1.jpg',
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return Container(color: colorScheme.primaryContainer);
+                    return Container(
+                      color: colorScheme.primary.withOpacity(0.1),
+                    );
                   },
                 ),
               ),
@@ -174,32 +183,50 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: colorScheme.onBackground,
                       ),
                     ),
-                    helper.vsLarge,
+                    Text(
+                      'Welcome back, you’ve been missed!',
+                      style: textTheme.titleMedium?.copyWith(
+                        color: helper.cTextMedium,
+                      ),
+                    ),
+                    helper.vsXLarge,
                     _buildTextField(
                       controller: _emailController,
-                      label: 'Email',
+                      label: 'Email Address',
+                      icon: Icons.email_outlined,
                       validator: AppValidators.validateEmail,
                     ),
                     helper.vsMedium,
                     _buildTextField(
                       controller: _passwordController,
                       label: 'Password',
+                      icon: Icons.lock_outline,
                       validator: AppValidators.validatePassword,
                       isPassword: true,
                     ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () =>
+                            context.pushNamed(RouteName.forgotPassword),
+                        child: Text(
+                          'Forgot your password?',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ),
                     helper.vsMedium,
+                    // 3. Tombol diperbarui dengan sudut membulat dan bayangan
                     SizedBox(
                       height: 52,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _attemptLogin,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.primary,
-                          foregroundColor: colorScheme.onPrimary,
+                          elevation: 3,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          textStyle: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         child: _isLoading
@@ -216,21 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             : const Text('Login'),
                       ),
                     ),
-                    helper.vsSmall,
-                    Align(
-                      alignment: Alignment.center,
-                      child: TextButton(
-                        onPressed: () =>
-                            context.pushNamed(RouteName.forgotPassword),
-                        child: Text(
-                          'Forgot your password?',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.05),
+                    helper.vsLarge,
                     Align(
                       alignment: Alignment.center,
                       child: RichText(
@@ -325,48 +338,5 @@ class _LoginScreenState extends State<LoginScreen> {
         margin: const EdgeInsets.all(16),
       ),
     );
-  }
-}
-
-// --- PERUBAHAN UTAMA DI SINI ---
-// Class helper untuk membuat efek lengkung pada gambar atas
-class TopImageClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-    // Mulai dari pojok kiri atas
-    path.lineTo(0, size.height - 80); // Turun ke kiri bawah, sisakan 80px
-
-    // Titik kontrol pertama untuk gelombang pertama
-    var firstControlPoint = Offset(size.width / 4, size.height);
-    // Titik akhir pertama untuk gelombang pertama (puncak gelombang)
-    var firstEndPoint = Offset(size.width / 2, size.height - 40);
-    path.quadraticBezierTo(
-      firstControlPoint.dx,
-      firstControlPoint.dy,
-      firstEndPoint.dx,
-      firstEndPoint.dy,
-    );
-
-    // Titik kontrol kedua untuk gelombang kedua
-    var secondControlPoint = Offset(size.width * 3 / 4, size.height - 80);
-    // Titik akhir kedua (pojok kanan bawah)
-    var secondEndPoint = Offset(size.width, size.height - 40);
-    path.quadraticBezierTo(
-      secondControlPoint.dx,
-      secondControlPoint.dy,
-      secondEndPoint.dx,
-      secondEndPoint.dy,
-    );
-
-    // Tarik garis ke pojok kanan atas
-    path.lineTo(size.width, 0);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return false;
   }
 }

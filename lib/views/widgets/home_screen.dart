@@ -532,7 +532,9 @@ class _HomeScreenState extends State<HomeScreen> {
               controller.onCategorySelected(category);
               // setState tidak diperlukan di sini karena Provider akan handle
             },
-            child: Container(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(horizontal: 18.0),
               margin: EdgeInsets.only(

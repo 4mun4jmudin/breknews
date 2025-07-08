@@ -8,20 +8,14 @@ import '../utils/helper.dart' as helper;
 import '../../routes/route_name.dart';
 
 class OnboardingPageUIData {
-  final String backgroundImagePath;
-  final String? foregroundImagePath;
+  final String illustrationPath;
   final String title;
   final String description;
-  final Color dominantColor;
-  final Color backgroundColor;
 
   OnboardingPageUIData({
-    required this.backgroundImagePath,
-    this.foregroundImagePath,
+    required this.illustrationPath,
     required this.title,
     required this.description,
-    required this.dominantColor,
-    required this.backgroundColor,
   });
 }
 
@@ -31,31 +25,22 @@ class OnboardingController with ChangeNotifier {
 
   final List<OnboardingPageUIData> _pages = [
     OnboardingPageUIData(
-      backgroundImagePath: 'assets/images/oren.jpg',
-      foregroundImagePath: 'assets/images/img intro 1.png',
-      title: 'Hi-Tech',
+      illustrationPath: 'assets/images/img intro 1.png',
+      title: 'Berita Terkini di Ujung Jari',
       description:
-          'Explore the latest advancements and technological breakthroughs shaping our future.',
-      dominantColor: Colors.orange.shade700,
-      backgroundColor: Colors.orange.shade100,
+          'Jangan lewatkan momen penting. Dapatkan pembaruan berita global, dari politik hingga tren budaya, secara real-time dan tepercaya.',
     ),
     OnboardingPageUIData(
-      backgroundImagePath: 'assets/images/biru.jpg',
-      foregroundImagePath: 'assets/images/img intro 2.png',
-      title: 'Personality',
+      illustrationPath: 'assets/images/img intro 2.png',
+      title: 'Feed Berita Sesuai Minat Anda',
       description:
-          'Understand diverse personalities and enhance your interpersonal skills effectively.',
-      dominantColor: Colors.blue.shade700,
-      backgroundColor: Colors.blue.shade100,
+          'Atur preferensi dan temukan cerita yang benar-benar penting bagi Anda. Dari teknologi, bisnis, hingga olahraga, semua bisa disesuaikan.',
     ),
     OnboardingPageUIData(
-      backgroundImagePath: 'assets/images/hejo.jpg',
-      foregroundImagePath: 'assets/images/img intro 3.png',
-      title: 'Global Mind',
+      illustrationPath: 'assets/images/img intro 3.png',
+      title: 'Jadi Bagian dari Cerita',
       description:
-          'Develop a global mindset to navigate and succeed in an interconnected world.',
-      dominantColor: Colors.green.shade700,
-      backgroundColor: Colors.green.shade100,
+          'Tidak hanya membaca, Anda juga bisa berkontribusi. Tulis dan publikasikan artikel Anda sendiri, lalu bagikan pandangan Anda dengan dunia.',
     ),
   ];
 
@@ -68,15 +53,19 @@ class OnboardingController with ChangeNotifier {
     notifyListeners();
   }
 
-  void nextPageOrFinish(BuildContext context) {
-    if (_currentPage < totalPages - 1) {
-      pageController.nextPage(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      context.goNamed(RouteName.login);
-    }
+  void nextPage(BuildContext context) {
+    pageController.nextPage(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void skip(BuildContext context) {
+    context.goNamed(RouteName.login);
+  }
+
+  void finish(BuildContext context) {
+    context.goNamed(RouteName.login);
   }
 
   @override
@@ -84,6 +73,39 @@ class OnboardingController with ChangeNotifier {
     pageController.dispose();
     super.dispose();
   }
+}
+
+class WaveCurveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(0, size.height - 80);
+
+    var firstControlPoint = Offset(size.width / 4, size.height);
+    var firstEndPoint = Offset(size.width / 2.2, size.height - 40);
+    path.quadraticBezierTo(
+      firstControlPoint.dx,
+      firstControlPoint.dy,
+      firstEndPoint.dx,
+      firstEndPoint.dy,
+    );
+
+    var secondControlPoint = Offset(size.width * 0.75, size.height - 90);
+    var secondEndPoint = Offset(size.width, size.height - 50);
+    path.quadraticBezierTo(
+      secondControlPoint.dx,
+      secondControlPoint.dy,
+      secondEndPoint.dx,
+      secondEndPoint.dy,
+    );
+
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
 class OnboardingScreen extends StatelessWidget {
@@ -95,98 +117,42 @@ class OnboardingScreen extends StatelessWidget {
 
     return ChangeNotifierProvider(
       create: (_) => OnboardingController(),
-      child: Consumer<OnboardingController>(
-        builder: (context, controller, child) {
-          final currentPageData = controller.pages[controller.currentPage];
-          final Color currentDominantColor = currentPageData.dominantColor;
-          final bool isLastPage =
-              controller.currentPage == controller.totalPages - 1;
-
-          return Scaffold(
-            body: Stack(
-              children: [
-                Column(
-                  children: <Widget>[
-                    Expanded(
-                      child: PageView.builder(
-                        controller: controller.pageController,
-                        onPageChanged: controller.onPageChanged,
-                        itemCount: controller.totalPages,
-                        itemBuilder: (context, index) {
-                          final pageData = controller.pages[index];
-                          return _OnboardingPageContentWidget(
-                            key: ValueKey('onboarding_page_$index'),
-                            backgroundImagePath: pageData.backgroundImagePath,
-                            foregroundImagePath: pageData.foregroundImagePath,
-                            title: pageData.title,
-                            description: pageData.description,
-                            dominantColor: pageData.dominantColor,
-                            backgroundColor: pageData.backgroundColor,
-                          );
-                        },
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: MediaQuery.of(context).padding.bottom > 0
-                            ? 24.0
-                            : 32.0,
-                      ),
-                      child: Column(
-                        children: [
-                          _buildPageIndicator(
-                            controller,
-                            currentDominantColor,
-                            appTheme,
-                          ),
-                          SizedBox(
-                            height: controller.totalPages > 1 ? 30.0 : 0,
-                          ),
-                          _buildNavigationButton(
-                            context,
-                            controller,
-                            currentDominantColor,
-                            appTheme,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                if (!isLastPage)
-                  Positioned(
-                    top: MediaQuery.of(context).padding.top + 8,
-                    right: 16,
-                    child: TextButton(
-                      onPressed: () {
-                        context.goNamed(RouteName.login);
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.black.withOpacity(0.2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: const Text('Skip'),
-                    ),
+      child: Scaffold(
+        // 1. Latar belakang utama diubah
+        backgroundColor: helper.cPrimary,
+        body: Consumer<OnboardingController>(
+          builder: (context, controller, child) {
+            return Column(
+              children: <Widget>[
+                Expanded(
+                  child: PageView.builder(
+                    controller: controller.pageController,
+                    onPageChanged: controller.onPageChanged,
+                    itemCount: controller.totalPages,
+                    itemBuilder: (context, index) {
+                      final pageData = controller.pages[index];
+                      return _OnboardingPageContentWidget(
+                        key: ValueKey('onboarding_page_$index'),
+                        illustrationPath: pageData.illustrationPath,
+                        title: pageData.title,
+                        description: pageData.description,
+                      );
+                    },
                   ),
+                ),
+                _buildPageIndicator(controller, appTheme),
+                helper.vsXLarge,
+                _buildNavigationControls(context, controller),
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
               ],
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildPageIndicator(
-    OnboardingController controller,
-    Color activeColor,
-    ThemeData theme,
-  ) {
-    if (controller.totalPages <= 1) return const SizedBox.shrink();
-
+  Widget _buildPageIndicator(OnboardingController controller, ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
@@ -197,9 +163,10 @@ class OnboardingScreen extends StatelessWidget {
           height: 8.0,
           width: controller.currentPage == index ? 24.0 : 8.0,
           decoration: BoxDecoration(
+            // 2. Warna indikator disesuaikan
             color: controller.currentPage == index
-                ? activeColor
-                : theme.colorScheme.onSurface.withOpacity(0.2),
+                ? Colors.white
+                : Colors.white.withOpacity(0.4),
             borderRadius: BorderRadius.circular(4.0),
           ),
         ),
@@ -207,147 +174,186 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNavigationButton(
+  Widget _buildNavigationControls(
     BuildContext context,
     OnboardingController controller,
-    Color buttonColor,
-    ThemeData theme,
   ) {
-    final bool isLastPage = controller.currentPage == controller.totalPages - 1;
+    // final theme = Theme.of(context);
+    final isLastPage = controller.currentPage == controller.totalPages - 1;
 
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: () => controller.nextPageOrFinish(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: buttonColor,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25.0),
-          ),
-          textStyle: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        child: Text(isLastPage ? 'Mulai' : 'Selanjutnya'),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (child, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.0, 0.5),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            ),
+          );
+        },
+        child: isLastPage
+            ? SizedBox(
+                key: const ValueKey('finish_button'),
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () => controller.finish(context),
+                  // 3. Style tombol diubah agar kontras
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: helper.cPrimary,
+                  ),
+                  child: const Text('Mulai'),
+                ),
+              )
+            : SizedBox(
+                key: const ValueKey('nav_buttons'),
+                height: 50,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => controller.skip(context),
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => controller.nextPage(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: helper.cPrimary,
+                      ),
+                      child: const Row(
+                        children: [
+                          Text('Next'),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_forward_rounded, size: 18),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
       ),
     );
   }
 }
 
 class _OnboardingPageContentWidget extends StatelessWidget {
-  final String backgroundImagePath;
-  final String? foregroundImagePath;
+  final String illustrationPath;
   final String title;
   final String description;
-  final Color dominantColor;
-  final Color backgroundColor;
 
   const _OnboardingPageContentWidget({
     super.key,
-    required this.backgroundImagePath,
-    this.foregroundImagePath,
+    required this.illustrationPath,
     required this.title,
     required this.description,
-    required this.dominantColor,
-    required this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Container(
-      color: backgroundColor,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            backgroundImagePath,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: backgroundColor,
-              child: Center(
-                child: Icon(
-                  Icons.error_outline,
-                  color: dominantColor,
-                  size: 50,
-                ),
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.black.withOpacity(0.1),
-                  Colors.black.withOpacity(0.3),
-                  backgroundColor.withOpacity(0.5),
-                  backgroundColor,
+    return Column(
+      children: [
+        Expanded(
+          flex: 5,
+          child: ClipPath(
+            clipper: WaveCurveClipper(),
+            child: Container(
+              color: Colors.white, // Area kurva menjadi putih
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  // 4. Warna hiasan disesuaikan
+                  Positioned(
+                    top: screenHeight * 0.1,
+                    left: 20,
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: theme.colorScheme.primary.withOpacity(
+                        0.1,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: screenHeight * 0.2,
+                    right: 40,
+                    child: CircleAvatar(
+                      radius: 30,
+                      backgroundColor: theme.colorScheme.primary.withOpacity(
+                        0.08,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 80,
+                    right: 100,
+                    child: CircleAvatar(
+                      radius: 15,
+                      backgroundColor: theme.colorScheme.primary.withOpacity(
+                        0.12,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      bottom: 60.0,
+                      top: screenHeight * 0.1,
+                    ),
+                    child: Image.asset(
+                      illustrationPath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.hide_image_outlined, size: 100),
+                    ),
+                  ),
                 ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0.0, 0.3, 0.7, 1.0],
               ),
             ),
           ),
-          if (foregroundImagePath != null)
-            Positioned.fill(
-              bottom: screenHeight * 0.25,
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Image.asset(
-                  foregroundImagePath!,
-                  height: screenHeight * 0.5,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const SizedBox.shrink(),
-                ),
-              ),
-            ),
-          Positioned(
-            bottom: screenHeight * 0.05,
-            left: 24,
-            right: 24,
+        ),
+        Expanded(
+          flex: 4,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                helper.vsLarge,
                 Text(
                   title,
-                  style: helper.headline2.copyWith(
+                  textAlign: TextAlign.center,
+                  // 5. Warna teks diubah menjadi putih
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    fontWeight: helper.bold,
-                    shadows: [
-                      const Shadow(
-                        blurRadius: 8.0,
-                        color: Colors.black54,
-                        offset: Offset(1, 1),
-                      ),
-                    ],
                   ),
                 ),
-                helper.vsSmall,
+                helper.vsMedium,
                 Text(
                   description,
-                  style: helper.subtitle1.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: Colors.white.withOpacity(0.8),
                     height: 1.5,
-                    shadows: [
-                      const Shadow(
-                        blurRadius: 6.0,
-                        color: Colors.black45,
-                        offset: Offset(1, 1),
-                      ),
-                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

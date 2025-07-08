@@ -60,7 +60,19 @@ class MainScaffold extends StatelessWidget {
         GoRouterState.of(context).topRoute?.name == RouteName.addLocalArticle;
 
     return Scaffold(
-      body: child,
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.98, end: 1.0).animate(animation),
+              child: child,
+            ),
+          );
+        },
+        child: child,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (GoRouterState.of(context).topRoute?.name !=

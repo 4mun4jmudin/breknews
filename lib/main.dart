@@ -1,5 +1,4 @@
-//----------------------------------------------------//
-
+// lib/main.dart
 // ignore_for_file: deprecated_member_use
 
 import 'package:breaknews/views/widgets/bookmark_screen.dart';
@@ -225,198 +224,204 @@ class MyApp extends StatelessWidget {
     final themeController = Provider.of<ThemeController>(context);
 
     return MaterialApp.router(
-      title: 'Aplikasi Berita Anda',
+      title: 'Break News',
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
-      theme: ThemeData(
-        useMaterial3: true,
-        primaryColor: helper.cPrimary,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: helper.cPrimary,
-          brightness: Brightness.light,
-          primary: helper.cPrimary,
-          secondary: helper.cTextBlue,
+      theme: _buildLightTheme(),
+      darkTheme: _buildDarkTheme(),
+      themeMode: themeController.themeMode,
+    );
+  }
+
+  ThemeData _buildLightTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      primaryColor: helper.cPrimary,
+      scaffoldBackgroundColor: helper.cWhite,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: helper.cPrimary,
+        brightness: Brightness.light,
+        primary: helper.cPrimary,
+        secondary: helper.cAccent,
+        background: helper.cWhite,
+        surface: helper.cLightGrey, // Untuk card
+        onPrimary: helper.cWhite,
+        onSecondary: helper.cWhite,
+        onBackground: helper.cTextDark,
+        onSurface: helper.cTextDark,
+        error: helper.cError,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: helper.cWhite,
+        foregroundColor: helper.cTextDark,
+        elevation: 0.5,
+        titleTextStyle: helper.headline4.copyWith(
+          color: helper.cPrimary,
+          fontWeight: helper.bold,
         ),
-        scaffoldBackgroundColor: helper.cWhite,
-        appBarTheme: AppBarTheme(
+      ),
+      textTheme: TextTheme(
+        displayLarge: helper.headline1,
+        displayMedium: helper.headline2,
+        displaySmall: helper.headline3,
+        headlineMedium: helper.headline4,
+        titleLarge: helper.subtitle1.copyWith(fontWeight: helper.bold),
+        bodyLarge: helper.subtitle1.copyWith(color: helper.cTextDark),
+        bodyMedium: helper.subtitle2,
+        labelLarge: helper.subtitle1.copyWith(fontWeight: helper.semibold),
+        bodySmall: helper.caption,
+        labelSmall: helper.overline,
+      ).apply(bodyColor: helper.cTextDark, displayColor: helper.cTextDark),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
           backgroundColor: helper.cPrimary,
           foregroundColor: helper.cWhite,
-          elevation: 1.0,
-          titleTextStyle: helper.headline4.copyWith(
-            color: helper.cWhite,
-            fontSize: 18,
+          textStyle: helper.subtitle1.copyWith(fontWeight: helper.semibold),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
           ),
-        ),
-        textTheme: TextTheme(
-          displayLarge: helper.headline1.copyWith(color: helper.cBlack),
-          displayMedium: helper.headline2.copyWith(color: helper.cBlack),
-          displaySmall: helper.headline3.copyWith(color: helper.cBlack),
-          headlineMedium: helper.headline4.copyWith(color: helper.cBlack),
-          titleLarge: helper.subtitle1.copyWith(
-            color: helper.cBlack,
-            fontWeight: helper.bold,
-          ),
-          bodyLarge: helper.subtitle1.copyWith(color: helper.cTextBlue),
-          bodyMedium: helper.subtitle2.copyWith(color: helper.cTextBlue),
-          labelLarge: helper.subtitle1.copyWith(
-            color: helper.cWhite,
-            fontWeight: helper.semibold,
-          ),
-          bodySmall: helper.caption.copyWith(color: helper.cTextBlue),
-          labelSmall: helper.overline.copyWith(color: helper.cTextBlue),
-        ).apply(fontFamily: helper.headline1.fontFamily),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: helper.cPrimary,
-            foregroundColor: helper.cWhite,
-            textStyle: helper.subtitle1.copyWith(fontWeight: helper.semibold),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: helper.cPrimary,
-            side: BorderSide(color: helper.cPrimary, width: 1.5),
-            textStyle: helper.subtitle1.copyWith(fontWeight: helper.semibold),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          border: helper.enableBorder,
-          enabledBorder: helper.enableBorder,
-          focusedBorder: helper.focusedBorder,
-          errorBorder: helper.errorBorder,
-          focusedErrorBorder: helper.focusedErrorBorder,
-          labelStyle: helper.subtitle2.copyWith(color: helper.cTextBlue),
-          hintStyle: helper.subtitle2.copyWith(color: helper.cLinear),
-        ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: helper.cWhite,
-          selectedItemColor: helper.cPrimary,
-          unselectedItemColor: helper.cLinear.withOpacity(0.8),
         ),
       ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: helper.cGrey,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: helper.cPrimary, width: 1.5),
+        ),
+        labelStyle: helper.subtitle2.copyWith(color: helper.cTextMedium),
+        hintStyle: helper.subtitle2.copyWith(
+          color: helper.cTextMedium.withOpacity(0.7),
+        ),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: helper.cWhite,
+        selectedItemColor: helper.cPrimary,
+        unselectedItemColor: helper.cTextMedium,
+        elevation: 2.0,
+      ),
+    );
+  }
+
+  ThemeData _buildDarkTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      primaryColor: helper.cPrimary,
+      scaffoldBackgroundColor: const Color(
+        0xFF121212,
+      ), // Latar belakang gelap murni
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: helper.cPrimary,
         brightness: Brightness.dark,
-        primaryColor: helper.cPrimary,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: helper.cPrimary,
-          brightness: Brightness.dark,
-          primary: helper.cPrimary,
-          secondary: helper.cLinear,
-          background: const Color(0xFF121212),
-          surface: const Color(0xFF1E1E1E),
-          error: helper.cError,
-          onPrimary: helper.cWhite,
-          onSecondary: helper.cBlack,
-          onBackground: helper.cWhite.withOpacity(0.87),
-          onSurface: helper.cWhite.withOpacity(0.87),
-          onError: helper.cWhite,
-        ),
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        appBarTheme: AppBarTheme(
-          backgroundColor: const Color(0xFF1E1E1E),
-          foregroundColor: helper.cWhite,
-          elevation: 1.0,
-          titleTextStyle: helper.headline4.copyWith(
-            color: helper.cWhite,
-            fontSize: 18,
-          ),
-        ),
-        textTheme: TextTheme(
-          displayLarge: helper.headline1.copyWith(
-            color: helper.cWhite.withOpacity(0.87),
-          ),
-          displayMedium: helper.headline2.copyWith(
-            color: helper.cWhite.withOpacity(0.87),
-          ),
-          displaySmall: helper.headline3.copyWith(
-            color: helper.cWhite.withOpacity(0.87),
-          ),
-          headlineMedium: helper.headline4.copyWith(
-            color: helper.cWhite.withOpacity(0.87),
-          ),
-          titleLarge: helper.subtitle1.copyWith(
-            color: helper.cWhite.withOpacity(0.87),
-            fontWeight: helper.bold,
-          ),
-          bodyLarge: helper.subtitle1.copyWith(
-            color: helper.cWhite.withOpacity(0.87),
-          ),
-          bodyMedium: helper.subtitle2.copyWith(
-            color: helper.cWhite.withOpacity(0.70),
-          ),
-          labelLarge: helper.subtitle1.copyWith(
-            color: helper.cWhite,
-            fontWeight: helper.semibold,
-          ),
-          bodySmall: helper.caption.copyWith(
-            color: helper.cWhite.withOpacity(0.70),
-          ),
-          labelSmall: helper.overline.copyWith(
-            color: helper.cWhite.withOpacity(0.70),
-          ),
-        ).apply(fontFamily: helper.headline1.fontFamily),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: helper.cPrimary,
-            foregroundColor: helper.cWhite,
-            textStyle: helper.subtitle1.copyWith(fontWeight: helper.semibold),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: helper.cPrimary,
-            side: BorderSide(color: helper.cPrimary, width: 1.5),
-            textStyle: helper.subtitle1.copyWith(fontWeight: helper.semibold),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          border: helper.enableBorder.copyWith(
-            borderSide: BorderSide(color: helper.cGrey.withOpacity(0.5)),
-          ),
-          enabledBorder: helper.enableBorder.copyWith(
-            borderSide: BorderSide(color: helper.cGrey.withOpacity(0.5)),
-          ),
-          focusedBorder: helper.focusedBorder.copyWith(
-            borderSide: BorderSide(color: helper.cPrimary),
-          ),
-          errorBorder: helper.errorBorder.copyWith(
-            borderSide: BorderSide(color: helper.cError),
-          ),
-          focusedErrorBorder: helper.focusedErrorBorder.copyWith(
-            borderSide: BorderSide(color: helper.cError),
-          ),
-          labelStyle: helper.subtitle2.copyWith(color: helper.cGrey),
-          hintStyle: helper.subtitle2.copyWith(
-            color: helper.cLinear.withOpacity(0.6),
-          ),
-          prefixIconColor: helper.cLinear.withOpacity(0.8),
-          fillColor: Colors.grey.shade800,
-          filled: true,
-        ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: const Color(0xFF1E1E1E),
-          selectedItemColor: helper.cPrimary,
-          unselectedItemColor: helper.cGrey.withOpacity(0.7),
+        primary: helper.cAccent, // Biru cerah sebagai primary di mode gelap
+        secondary: helper.cPrimary,
+        background: const Color(0xFF121212),
+        surface: const Color(0xFF1E1E1E), // Untuk card di mode gelap
+        onPrimary: helper.cWhite,
+        onSecondary: helper.cWhite,
+        onBackground: helper.cWhite.withOpacity(0.87),
+        onSurface: helper.cWhite.withOpacity(0.87),
+        error: helper.cError,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: const Color(0xFF1E1E1E),
+        foregroundColor: helper.cWhite.withOpacity(0.87),
+        elevation: 0,
+        titleTextStyle: helper.headline4.copyWith(
+          color: helper.cAccent,
+          fontWeight: helper.bold,
         ),
       ),
-      themeMode: themeController.themeMode,
+      textTheme:
+          TextTheme(
+            displayLarge: helper.headline1.copyWith(
+              color: helper.cWhite.withOpacity(0.87),
+            ),
+            displayMedium: helper.headline2.copyWith(
+              color: helper.cWhite.withOpacity(0.87),
+            ),
+            displaySmall: helper.headline3.copyWith(
+              color: helper.cWhite.withOpacity(0.87),
+            ),
+            headlineMedium: helper.headline4.copyWith(
+              color: helper.cWhite.withOpacity(0.87),
+            ),
+            titleLarge: helper.subtitle1.copyWith(
+              color: helper.cWhite.withOpacity(0.87),
+              fontWeight: helper.bold,
+            ),
+            bodyLarge: helper.subtitle1.copyWith(
+              color: helper.cWhite.withOpacity(0.87),
+            ),
+            bodyMedium: helper.subtitle2.copyWith(
+              color: helper.cWhite.withOpacity(0.70),
+            ),
+            labelLarge: helper.subtitle1.copyWith(fontWeight: helper.semibold),
+            bodySmall: helper.caption.copyWith(
+              color: helper.cWhite.withOpacity(0.70),
+            ),
+            labelSmall: helper.overline.copyWith(
+              color: helper.cWhite.withOpacity(0.70),
+            ),
+          ).apply(
+            bodyColor: helper.cWhite.withOpacity(0.87),
+            displayColor: helper.cWhite.withOpacity(0.87),
+          ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: helper.cAccent,
+          foregroundColor: helper.cWhite,
+          textStyle: helper.subtitle1.copyWith(fontWeight: helper.semibold),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFF2C2C2C),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: helper.cAccent, width: 1.5),
+        ),
+        labelStyle: helper.subtitle2.copyWith(
+          color: helper.cWhite.withOpacity(0.70),
+        ),
+        hintStyle: helper.subtitle2.copyWith(
+          color: helper.cWhite.withOpacity(0.5),
+        ),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: const Color(0xFF1E1E1E),
+        selectedItemColor: helper.cAccent,
+        unselectedItemColor: Colors.grey[500],
+      ),
     );
   }
 }
